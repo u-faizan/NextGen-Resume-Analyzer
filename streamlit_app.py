@@ -29,7 +29,7 @@ conn.commit()
 # API Configuration
 # ------------------------
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = "YOUR_API_KEY"
+API_KEY = "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"
 
 # Function to call API
 def get_resume_analysis(resume_text):
