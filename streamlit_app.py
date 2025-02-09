@@ -1,3 +1,4 @@
+import streamlit as st
 # Streamlit App Title
 st.title("DeepSeek Chatbot")
 st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
