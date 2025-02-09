@@ -2,6 +2,7 @@ streamlit
 streamlit_tags
 pdfminer
 pdfminer.six
+pdfminer.high_level
 openai
 pymysql
 jason
