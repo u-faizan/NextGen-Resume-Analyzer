@@ -3,9 +3,8 @@ import requests
 import json
 import sqlite3
 import pandas as pd
-import pdfminer
-from pdfminer.high_level import extract_text
 from PIL import Image
+import fitz  # PyMuPDF for PDF text extraction
 
 # ------------------------
 # Database Setup
@@ -67,6 +66,16 @@ def get_resume_analysis(resume_text):
         return {"error": f"API Error {response.status_code}"}
 
 # ------------------------
+# PDF Text Extraction with PyMuPDF
+# ------------------------
+def extract_text_from_pdf(pdf_path):
+    doc = fitz.open(pdf_path)
+    text = ""
+    for page in doc:
+        text += page.get_text()
+    return text.strip()
+
+# ------------------------
 # Streamlit App
 # ------------------------
 st.set_page_config(page_title="Smart Resume Analyzer", page_icon="📄")
@@ -82,7 +91,7 @@ if mode == "User":
         with open("temp_resume.pdf", "wb") as f:
             f.write(uploaded_file.getbuffer())
 
-        resume_text = extract_text("temp_resume.pdf")
+        resume_text = extract_text_from_pdf("temp_resume.pdf")
         st.subheader("Extracted Resume Text")
         st.text(resume_text[:500] + "...")
 
