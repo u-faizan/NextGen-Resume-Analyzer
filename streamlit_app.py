@@ -1,5 +1,6 @@
 import streamlit as st
 from PIL import Image
+import json
 
 # Page Configuration
 st.set_page_config(page_title="AI-Powered Resume Analyzer", page_icon="📄", layout="wide")
@@ -73,15 +74,17 @@ with st.container():
 # Course Recommendations Section
 st.header("Courses & Certificates Recommendations 🎓")
 num_courses = st.slider("Choose Number of Course Recommendations:", 1, 10, 5)
-courses = [
-    ("Python and Django Full Stack Web Developer Bootcamp", "https://www.udemy.com/course/python-and-django-full-stack-web-developer-bootcamp/"),
-    ("Become a React Developer by Udacity", "https://www.udacity.com/course/react-nanodegree--nd019"),
-    ("Django Crash course [Free]", "https://www.example.com/django-crash-course"),
-    ("ReactJS Project Development Training", "https://www.example.com/reactjs-training"),
-    ("Full Stack Web Developer by Udacity", "https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd004")
-]
-for i in range(num_courses):
-    st.markdown(f"[{courses[i][0]}]({courses[i][1]})")
+
+# Simulated model response
+model_response = '{"courses": [{"name": "Python and Django Full Stack Web Developer Bootcamp", "url": "https://www.udemy.com/course/python-and-django-full-stack-web-developer-bootcamp/"}, {"name": "Become a React Developer by Udacity", "url": "https://www.udacity.com/course/react-nanodegree--nd019"}, {"name": "Django Crash course [Free]", "url": "https://www.example.com/django-crash-course"}, {"name": "ReactJS Project Development Training", "url": "https://www.example.com/reactjs-training"}, {"name": "Full Stack Web Developer by Udacity", "url": "https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd004"}]}'
+
+# Convert JSON to Python dictionary
+courses_data = json.loads(model_response)
+
+# Display courses dynamically
+for i in range(min(num_courses, len(courses_data['courses']))):
+    course = courses_data['courses'][i]
+    st.markdown(f"[{course['name']}]({course['url']})")
 
 # Resume Tips & Ideas
 st.header("Resume Tips & Ideas 💡")
