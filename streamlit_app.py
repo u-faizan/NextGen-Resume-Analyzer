@@ -8,7 +8,7 @@ st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 # Initialize the OpenAI client with API Key
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key="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"
+    api_key="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"
 )
 
 # Session state for managing conversation
