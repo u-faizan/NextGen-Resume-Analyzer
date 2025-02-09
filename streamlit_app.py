@@ -9,7 +9,7 @@ st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 
 # API Configuration
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = "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"  # Replace with your valid API key
+API_KEY = st.secrets["api_key"]  # Securely accessing API key from secrets
 
 # Cooldown time between requests (in seconds)
 COOLDOWN_PERIOD = 5
