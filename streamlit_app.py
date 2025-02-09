@@ -29,7 +29,7 @@ conn.commit()
 # API Configuration
 # ------------------------
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = st.secrets["API_KEY"]  # Securely access the API key
+API_KEY = st.secrets["API_KEY"]  # Securely accessing the API key from secrets
 
 def get_resume_analysis(resume_text):
     prompt = f"""
@@ -79,12 +79,11 @@ def get_resume_analysis(resume_text):
         "model": "deepseek/deepseek-r1-distill-llama-70b:free",
         "messages": [{"role": "user", "content": prompt}]
     }
-
     response = requests.post(API_URL, headers=headers, json=payload)
     if response.status_code == 200:
         try:
             raw_response = response.json()["choices"][0]["message"]["content"]
-            # Extract the JSON block using regex
+            # Use regex to extract the JSON block
             json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
             if json_match:
                 json_text = json_match.group(0)
@@ -117,25 +116,30 @@ mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 if mode == "User":
     st.title("📄 Smart Resume Analyzer")
     uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
-
     if uploaded_file:
         st.success("File uploaded successfully!")
         resume_text = extract_text_from_pdf(uploaded_file)
         st.subheader("Extracted Resume Text")
         st.text(resume_text[:500] + "...")
-
         if st.button("Analyze Resume"):
             with st.spinner("Analyzing resume..."):
                 result = get_resume_analysis(resume_text)
             if "error" in result:
                 st.error(result["error"])
             else:
-                st.success("Resume Analyzed Successfully!")
+                # Extract all sections from the result
                 basic_info = result.get("basic_info", {})
                 skills = result.get("skills", {})
-
-                # --- Resume Score Extraction ---
+                course_recommendations = result.get("course_recommendations", [])
+                appreciation = result.get("appreciation", [])
+                resume_tips = result.get("resume_tips", [])
                 resume_score_raw = result.get("resume_score", "70/100")
+                ai_resume_summary = result.get("ai_resume_summary", "")
+                matching_job_roles = result.get("matching_job_roles", [])
+                ats_keywords = result.get("ats_keywords", [])
+                project_suggestions = result.get("project_suggestions", [])
+
+                # --- Process Resume Score ---
                 if isinstance(resume_score_raw, int):
                     resume_score = resume_score_raw
                 elif isinstance(resume_score_raw, str):
@@ -144,8 +148,7 @@ if mode == "User":
                 else:
                     resume_score = 70
 
-                # --- Course Recommendations Handling ---
-                course_recommendations = result.get("course_recommendations", [])
+                # --- Process Course Recommendations ---
                 if isinstance(course_recommendations, str):
                     try:
                         course_recommendations = json.loads(course_recommendations)
@@ -156,11 +159,13 @@ if mode == "User":
                 elif not isinstance(course_recommendations, list):
                     course_recommendations = []
 
-                # Displaying the results:
+                # Display the results in separate sections
                 st.header("Basic Info")
-                st.write(basic_info)
+                st.json(basic_info)
+
                 st.header("Skills")
-                st.write(skills)
+                st.json(skills)
+
                 st.header("Recommended Courses")
                 for course in course_recommendations:
                     if isinstance(course, dict):
@@ -170,10 +175,32 @@ if mode == "User":
                         st.markdown(f"- **{platform}**: [{course_name}]({link})")
                     else:
                         st.markdown(f"- {course}")
+
+                st.header("Appreciation")
+                for comment in appreciation:
+                    st.markdown(f"- {comment}")
+
+                st.header("Resume Tips")
+                for tip in resume_tips:
+                    st.markdown(f"- {tip}")
+
+                st.header("AI Resume Summary")
+                st.write(ai_resume_summary)
+
+                st.header("Matching Job Roles")
+                st.write(", ".join(matching_job_roles) if matching_job_roles else "N/A")
+
+                st.header("ATS Keywords")
+                st.write(", ".join(ats_keywords) if ats_keywords else "N/A")
+
+                st.header("Project Suggestions")
+                for suggestion in project_suggestions:
+                    st.markdown(f"- {suggestion}")
+
                 st.header("Resume Score")
                 st.metric(label="Score", value=f"{resume_score}/100")
 
-                # Save to database
+                # Save to database (storing some of the details)
                 cursor.execute('''
                     INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, timestamp)
                     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
@@ -192,7 +219,6 @@ elif mode == "Admin":
     st.title("🔐 Admin Dashboard")
     admin_user = st.text_input("Username")
     admin_pass = st.text_input("Password", type="password")
-
     if st.button("Login"):
         if admin_user == "admin" and admin_pass == "admin123":
             st.success("Logged in as Admin")
