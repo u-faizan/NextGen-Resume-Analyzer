@@ -26,7 +26,6 @@ if user_input:
     # Display user input immediately
     st.session_state.message_log.append({"role": "user", "content": user_input})
     
-    # Re-render the chat with the new user message
     with st.chat_message("user"):
         st.markdown(user_input)
 
@@ -38,24 +37,33 @@ if user_input:
 
     payload = {
         "model": "deepseek/deepseek-r1-distill-llama-70b:free",
-        "messages": st.session_state.message_log  # Send complete message history
+        "messages": st.session_state.message_log
     }
 
     # Get AI response
     with st.spinner("Generating response..."):
         response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
 
+    # Error Handling
     if response.status_code == 200:
-        ai_response = response.json()["choices"][0]["message"]["content"]
-        st.session_state.message_log.append({"role": "ai", "content": ai_response})
+        response_data = response.json()
         
-        # Display AI response immediately
-        with st.chat_message("ai"):
-            st.markdown(ai_response)
+        if "choices" in response_data:
+            ai_response = response_data["choices"][0]["message"]["content"]
+            st.session_state.message_log.append({"role": "ai", "content": ai_response})
+
+            with st.chat_message("ai"):
+                st.markdown(ai_response)
+        else:
+            error_message = response_data.get("error", {}).get("message", "Unexpected response structure.")
+            st.session_state.message_log.append({"role": "ai", "content": f"Error: {error_message}"})
+            
+            with st.chat_message("ai"):
+                st.markdown(f"Error: {error_message}")
     else:
-        error_message = response.json().get('error', {}).get('message', 'Unknown error')
-        st.session_state.message_log.append({"role": "ai", "content": f"Error {response.status_code}: {error_message}"})
+        # Handle HTTP errors
+        error_message = response.json().get('error', {}).get('message', f"HTTP {response.status_code} Error")
+        st.session_state.message_log.append({"role": "ai", "content": f"Error: {error_message}"})
         
-        # Display error message
         with st.chat_message("ai"):
-            st.markdown(f"Error {response.status_code}: {error_message}")
+            st.markdown(f"Error: {error_message}")
