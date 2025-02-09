@@ -4,6 +4,7 @@ requests
 pdfminer.six
 Pillow
 openai
+sqlite3
 
 
 
