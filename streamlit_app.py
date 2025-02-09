@@ -15,7 +15,7 @@ def extract_text_from_pdf(uploaded_file):
         return "No file uploaded."
 
 # Streamlit App Interface
-st.title("\ud83d\udcc4 Smart Resume Analyzer")
+st.title("Smart Resume Analyzer")
 
 uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
 
