@@ -132,8 +132,16 @@ if mode == "User":
                 st.header("Recommended Courses")
                 for course in courses:
                     st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
-                st.header("Resume Score")
-                st.metric(label="Score", value=f"{resume_score}/100")
+                # Extract and validate resume score
+                resume_score_raw = result.get("resume_score", "70/100")  # Default to "70/100" if missing
+                
+                if isinstance(resume_score_raw, int):  
+                    resume_score = resume_score_raw  # If already an integer, use directly
+                elif isinstance(resume_score_raw, str):  
+                    resume_score_match = re.search(r'\d+', resume_score_raw)  # Extract numeric value
+                    resume_score = int(resume_score_match.group()) if resume_score_match else 70  # Default to 70 if extraction fails
+                else:
+                    resume_score = 70  # Fallback in case of unexpected format
 
                 # Save to database
                 cursor.execute('''
