@@ -3,6 +3,7 @@ import requests
 import json
 import sqlite3
 import pandas as pd
+import pdfminer
 from pdfminer.high_level import extract_text
 from PIL import Image
 
