@@ -4,7 +4,7 @@ pandas
 Pillow
 pdfminer.six
 openai
-sqlite3
+pysql
 
 
 
