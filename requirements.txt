@@ -1,6 +1,5 @@
 streamlit
-streamlit_tags
-openai
+pdfminer.six
 requests
 
 
