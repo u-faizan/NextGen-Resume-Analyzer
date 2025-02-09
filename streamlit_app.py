@@ -8,7 +8,7 @@ st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 
 # API Configuration
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = "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"  # Replace with your actual API key
+API_KEY = "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"  # Replace with your actual API key
 
 
 # Initialize message log in session state
