@@ -1,24 +1,21 @@
 import streamlit as st
-import fitz  # PyMuPDF for PDF text extraction
+from pdfminer.high_level import extract_text
+
+# Function to extract text from PDF using pdfminer
 
 def extract_text_from_pdf(uploaded_file):
     if uploaded_file is not None:
-        # Read file as bytes
-        pdf_bytes = uploaded_file.read()
+        with open("temp_resume.pdf", "wb") as f:
+            f.write(uploaded_file.getbuffer())  # Save uploaded file locally
         
-        # Open the PDF from bytes
-        pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
-        
-        # Extract text
-        extracted_text = ""
-        for page in pdf_document:
-            extracted_text += page.get_text()
+        # Extract text from the saved PDF
+        extracted_text = extract_text("temp_resume.pdf")
         return extracted_text
     else:
         return "No file uploaded."
 
 # Streamlit App Interface
-st.title("📄 Smart Resume Analyzer")
+st.title("\ud83d\udcc4 Smart Resume Analyzer")
 
 uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
 
