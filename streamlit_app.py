@@ -8,7 +8,7 @@ st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 
 # API Configuration
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = "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"  # Replace with your actual key
+API_KEY = "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"  # Replace with your actual API key
 
 # Initialize message log in session state
 if "message_log" not in st.session_state:
@@ -22,8 +22,9 @@ for message in st.session_state.message_log:
 # User Input
 user_input = st.chat_input("Type your message here...")
 
-# Only send API request if user_input exists
-if user_input:
+if user_input and "last_input" not in st.session_state:
+    st.session_state.last_input = user_input  # Store the last input to avoid repeated API calls
+
     # Add user message to the session log
     st.session_state.message_log.append({"role": "user", "content": user_input})
 
@@ -46,8 +47,8 @@ if user_input:
         ai_response = response.json()["choices"][0]["message"]["content"]
         st.session_state.message_log.append({"role": "ai", "content": ai_response})
     else:
-        ai_response = f"Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}"
+        error_message = response.json().get('error', {}).get('message', 'Unknown error')
+        ai_response = f"Error {response.status_code}: {error_message}"
         st.session_state.message_log.append({"role": "ai", "content": ai_response})
 
-    # Rerun to display the new messages
-    st.experimental_rerun()
+    del st.session_state.last_input  # Remove last_input after processing
