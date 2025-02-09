@@ -1,15 +1,18 @@
 import streamlit as st
+import requests
+import json  # Ensure json is imported
+
 # Streamlit App Title
 st.title("DeepSeek Chatbot")
 st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 
 # API Configuration
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = "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" # Make sure your API key is securely stored in .streamlit/secrets.toml
+API_KEY = "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"  # Replace with your valid API key
 
 # Initialize message log in session state
 if "message_log" not in st.session_state:
-    st.session_state.message_log = [{"role": "ai", "content": "Hello! How can I assist you today? ðŸ˜Š"}]
+    st.session_state.message_log = [{"role": "ai", "content": "Hello! How can I assist you today? 😊"}]
 
 # Display Chat History
 for message in st.session_state.message_log:
@@ -39,7 +42,7 @@ if user_input:
 
     # Get AI response
     with st.spinner("Generating response..."):
-        response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
+        response = requests.post(API_URL, headers=headers, json=payload)
 
     # Error Handling
     if response.status_code == 200:
