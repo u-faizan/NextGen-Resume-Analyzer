@@ -61,14 +61,25 @@ def get_resume_analysis(resume_text):
 
     if response.status_code == 200:
         raw_response = response.json()["choices"][0]["message"]["content"]
-        st.write("**Raw API Response:**", raw_response)  # Debug output
+        st.write("**Raw API Response:**", raw_response)  # Display raw response for debugging
 
-        try:
-            return json.loads(raw_response)
-        except json.JSONDecodeError:
-            return {"error": "Invalid JSON response from API."}
+        # Extract JSON using regex
+        import re
+        json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)  # Find the JSON part
+
+        if json_match:
+            json_text = json_match.group(0)
+            try:
+                return json.loads(json_text)  # Convert JSON string to Python dictionary
+            except json.JSONDecodeError:
+                return {"error": "Error: The extracted JSON is not valid."}
+        else:
+            return {"error": "Error: No valid JSON found in the response."}
+
     else:
-        return {"error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}"}
+        return {
+            "error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}"
+        }
 
 # ------------------------
 # PDF Text Extraction
