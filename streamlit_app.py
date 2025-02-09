@@ -43,10 +43,12 @@ def get_resume_analysis(resume_text):
     }}
     Resume text:
     '''{resume_text}'''
+
+    **Return ONLY valid JSON. Do not include explanations, comments, or extra text.**
     """
 
     headers = {
-        "Authorization": f"Bearer {API_KEY}",  # Ensure the Bearer prefix is included
+        "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
 
@@ -58,12 +60,15 @@ def get_resume_analysis(resume_text):
     response = requests.post(API_URL, headers=headers, json=payload)
 
     if response.status_code == 200:
+        raw_response = response.json()["choices"][0]["message"]["content"]
+        st.write("**Raw API Response:**", raw_response)  # Debug output
+
         try:
-            return json.loads(response.json()["choices"][0]["message"]["content"])
-        except (KeyError, json.JSONDecodeError):
+            return json.loads(raw_response)
+        except json.JSONDecodeError:
             return {"error": "Invalid JSON response from API."}
     else:
-        return {"error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}",}
+        return {"error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}"}
 
 # ------------------------
 # PDF Text Extraction
