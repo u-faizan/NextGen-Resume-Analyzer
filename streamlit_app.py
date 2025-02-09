@@ -5,7 +5,6 @@ import sqlite3
 import pandas as pd
 import re
 from pdfminer.high_level import extract_text
-from PIL import Image
 
 # ------------------------
 # Database Setup
@@ -30,12 +29,12 @@ conn.commit()
 # API Configuration
 # ------------------------
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = st.secrets["API_KEY"]  # Securely accessing API key from secrets
+API_KEY = st.secrets["API_KEY"]
 
 # Function to call API
 def get_resume_analysis(resume_text):
     prompt = f"""
-    You are an expert resume analyzer. Extract and output the following information strictly in JSON format:
+    You are an expert resume analyzer. Extract and return the following information strictly in JSON format:
     {{
         "basic_info": {{ "name": string, "email": string }},
         "skills": {{ "current_skills": list, "recommended_skills": list }},
@@ -60,14 +59,14 @@ def get_resume_analysis(resume_text):
 
     if response.status_code == 200:
         try:
-            # Extract valid JSON using regex
+            # Extract JSON content from response
             json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
             if json_match:
                 json_text = json_match.group(0)
                 return json.loads(json_text)
             else:
                 return {"error": "No valid JSON found in API response."}
-        except (KeyError, json.JSONDecodeError):
+        except json.JSONDecodeError:
             return {"error": "Invalid JSON response from API."}
     else:
         return {"error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}"}
@@ -80,7 +79,7 @@ def extract_text_from_pdf(uploaded_file):
         with open("temp_resume.pdf", "wb") as f:
             f.write(uploaded_file.getbuffer())  # Save uploaded file locally
         extracted_text = extract_text("temp_resume.pdf")
-        return extracted_text if extracted_text.strip() else "No text extracted from the PDF."
+        return extracted_text.strip() if extracted_text else "No text extracted."
     return "No file uploaded."
 
 # ------------------------
@@ -110,44 +109,41 @@ if mode == "User":
                 st.error(result["error"])
             else:
                 st.success("Resume Analyzed Successfully!")
+
+                # Extract and display results
                 basic_info = result.get("basic_info", {})
                 skills = result.get("skills", {})
                 courses = result.get("course_recommendations", [])
                 resume_score_raw = result.get("resume_score", "70/100")
 
-                # Ensure resume_score is properly extracted as an integer
-                if isinstance(resume_score_raw, int):
-                    resume_score = resume_score_raw
-                elif isinstance(resume_score_raw, str):
+                # Extract resume score safely
+                resume_score = 70  # Default
+                if isinstance(resume_score_raw, str):
                     resume_score_match = re.search(r'\d+', resume_score_raw)
-                    resume_score = int(resume_score_match.group()) if resume_score_match else 70
-                else:
-                    resume_score = 70
+                    if resume_score_match:
+                        resume_score = int(resume_score_match.group())
 
-                # Display results
+                # Display extracted information
                 st.header("Basic Info")
-                st.write(f"**Name:** {basic_info.get('name', 'N/A')}")
-                st.write(f"**Email:** {basic_info.get('email', 'N/A')}")
+                st.write(f"**Name:** {basic_info.get('name', 'Not Found')}")
+                st.write(f"**Email:** {basic_info.get('email', 'Not Found')}")
 
                 st.header("Skills")
-                st.write(f"**Current Skills:** {', '.join(skills.get('current_skills', [])) or 'N/A'}")
-                st.write(f"**Recommended Skills:** {', '.join(skills.get('recommended_skills', [])) or 'N/A'}")
+                current_skills = skills.get("current_skills", [])
+                recommended_skills = skills.get("recommended_skills", [])
+
+                st.write(f"**Current Skills:** {', '.join(current_skills) if current_skills else 'Not Found'}")
+                st.write(f"**Recommended Skills:** {', '.join(recommended_skills) if recommended_skills else 'Not Found'}")
 
                 st.header("Recommended Courses")
-                if isinstance(courses, str):
-                    try:
-                        courses = json.loads(courses)  # Convert string to list if necessary
-                    except json.JSONDecodeError:
-                        courses = []
-
-                if isinstance(courses, list):
+                if isinstance(courses, list) and courses:
                     for course in courses:
                         if isinstance(course, dict) and all(k in course for k in ["platform", "course_name", "link"]):
                             st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
                         else:
                             st.warning("Unexpected course data format.")
                 else:
-                    st.warning("No valid courses found.")
+                    st.warning("No course recommendations available.")
 
                 st.header("Resume Score")
                 st.metric(label="Score", value=f"{resume_score}/100")
@@ -157,11 +153,11 @@ if mode == "User":
                     INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, timestamp)
                     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
                 ''', (
-                    basic_info.get("name", "N/A"),
-                    basic_info.get("email", "N/A"),
+                    basic_info.get("name", "Unknown"),
+                    basic_info.get("email", "Unknown"),
                     resume_score,
-                    ", ".join(skills.get("current_skills", [])),
-                    ", ".join(skills.get("recommended_skills", [])),
+                    ", ".join(current_skills),
+                    ", ".join(recommended_skills),
                     ", ".join([course['course_name'] for course in courses if isinstance(course, dict)])
                 ))
                 conn.commit()
