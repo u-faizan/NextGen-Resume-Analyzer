@@ -1,8 +1,7 @@
 streamlit
 streamlit_tags
 python==3.10
-pdfminer
-pdfminer.six
+pdfminer.six==20221105
 openai
 pymysql
 jason
