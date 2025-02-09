@@ -46,4 +46,45 @@ if user_input:
         # Prepare API request
         headers = {
             "Authorization": f"Bearer {API_KEY}",
-            "Content-Type":
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "model": "deepseek/deepseek-r1-distill-llama-70b:free",
+            "messages": st.session_state.message_log
+        }
+
+        # Get AI response
+        with st.spinner("Generating response..."):
+            response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
+
+        # Update the last request time to enforce cooldown
+        st.session_state.last_request_time = time.time()
+
+        # Error Handling
+        if response.status_code == 200:
+            response_data = response.json()
+            
+            if "choices" in response_data:
+                ai_response = response_data["choices"][0]["message"]["content"]
+                st.session_state.message_log.append({"role": "ai", "content": ai_response})
+
+                with st.chat_message("ai"):
+                    st.markdown(ai_response)
+            else:
+                error_message = response_data.get("error", {}).get("message", "Unexpected response structure.")
+                st.session_state.message_log.append({"role": "ai", "content": f"Error: {error_message}"})
+                
+                with st.chat_message("ai"):
+                    st.markdown(f"Error: {error_message}")
+        else:
+            # Handle HTTP errors
+            try:
+                error_message = response.json().get('error', {}).get('message', f"HTTP {response.status_code} Error")
+            except json.JSONDecodeError:
+                error_message = f"HTTP {response.status_code} Error: Unable to parse error message."
+
+            st.session_state.message_log.append({"role": "ai", "content": f"Error: {error_message}"})
+            
+            with st.chat_message("ai"):
+                st.markdown(f"Error: {error_message}")
