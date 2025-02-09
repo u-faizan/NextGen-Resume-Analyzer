@@ -1,118 +1,158 @@
 import streamlit as st
-from PIL import Image
+import requests
 import json
+import sqlite3
+import pandas as pd
+from pdfminer.high_level import extract_text
+from PIL import Image
 
-# Page Configuration
-st.set_page_config(page_title="AI-Powered Resume Analyzer", page_icon="📄", layout="wide")
+# ------------------------
+# Database Setup
+# ------------------------
+conn = sqlite3.connect('resume_data.db')
+cursor = conn.cursor()
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_data (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT,
+        resume_score INTEGER,
+        skills TEXT,
+        recommended_skills TEXT,
+        courses TEXT,
+        timestamp TEXT
+    )
+''')
+conn.commit()
 
-# Custom CSS for advanced styling
-st.markdown("""
-    <style>
-        body {
-            background-color: #f0f2f6;
-        }
-        .stApp {
-            background: linear-gradient(to right, #e0eafc, #cfdef3);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2, h3 {
-            color: #333;
-            font-family: 'Arial', sans-serif;
-        }
-        .info-box {
-            background-color: #ffffff;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .score-bar {
-            height: 20px;
-            border-radius: 10px;
-            background: linear-gradient(to right, #ff6b6b, #feca57);
-        }
-        .recommendation {
-            background-color: #f7f9fc;
-            border: 1px solid #e3e6ea;
-            padding: 15px;
-            border-radius: 10px;
-        }
-        .highlight {
-            color: #1e90ff;
-            font-weight: bold;
-        }
-    </style>
-""", unsafe_allow_html=True)
+# ------------------------
+# API Configuration
+# ------------------------
+API_URL = "https://openrouter.ai/api/v1/chat/completions"
+API_KEY = st.secrets["API_KEY"]  # Securely accessing API key from secrets
 
-# Header
-st.title("📄 AI-Powered Resume Analyzer")
+# Function to call API
+def get_resume_analysis(resume_text):
+    prompt = f"""
+    You are an expert resume analyzer. Extract and output the following information strictly in JSON format:
+    {{
+        "basic_info": {{ "name": string, "email": string }},
+        "skills": {{ "current_skills": list, "recommended_skills": list }},
+        "course_recommendations": list,
+        "resume_score": string
+    }}
+    Resume text:
+    '''{resume_text}'''
+    """
 
-# Basic Info Section
-st.header("Resume Analysis")
-with st.container():
-    st.success("Hello Deepak Padhi")
-    st.subheader("Your Basic Info")
-    st.write("Name: **Deepak Padhi**")
-    st.write("Email: **dee**")
-    st.write("Contact: **84**")
-    st.write("Resume Pages: **2**")
-    st.markdown("<p class='highlight'>You are at intermediate level!</p>", unsafe_allow_html=True)
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",  # Ensure the Bearer prefix is included
+        "Content-Type": "application/json"
+    }
 
-# Skills Section
-st.header("Skills Recommendation 💡")
-with st.container():
-    st.subheader("Your Current Skills")
-    current_skills = ["Python", "CSS", "SQL", "Engineering", "Database", "HTML", "Analyze", "C", "Website", "System", "Controls", "Github", "Analysis", "Policies", "JavaScript"]
-    st.write(", ".join(current_skills))
-    st.success("**Our analysis says you are looking for Web Development Jobs**")
-    
-    st.subheader("Recommended Skills for You")
-    recommended_skills = ["React", "Django", "Node JS", "React JS", "PHP", "Laravel", "Magento", "WordPress", "JavaScript", "Angular JS", "C#", "Flask", "SDK"]
-    st.write(", ".join(recommended_skills))
+    payload = {
+        "model": "deepseek/deepseek-r1-distill-llama-70b:free",
+        "messages": [{"role": "user", "content": prompt}]
+    }
 
-# Course Recommendations Section
-st.header("Courses & Certificates Recommendations 🎓")
-num_courses = st.slider("Choose Number of Course Recommendations:", 1, 10, 5)
+    response = requests.post(API_URL, headers=headers, json=payload)
 
-# Simulated model response
-model_response = '{"courses": [{"name": "Python and Django Full Stack Web Developer Bootcamp", "url": "https://www.udemy.com/course/python-and-django-full-stack-web-developer-bootcamp/"}, {"name": "Become a React Developer by Udacity", "url": "https://www.udacity.com/course/react-nanodegree--nd019"}, {"name": "Django Crash course [Free]", "url": "https://www.example.com/django-crash-course"}, {"name": "ReactJS Project Development Training", "url": "https://www.example.com/reactjs-training"}, {"name": "Full Stack Web Developer by Udacity", "url": "https://www.udacity.com/course/full-stack-web-developer-nanodegree--nd004"}]}'
-
-# Convert JSON to Python dictionary
-courses_data = json.loads(model_response)
-
-# Display courses dynamically
-for i in range(min(num_courses, len(courses_data['courses']))):
-    course = courses_data['courses'][i]
-    st.markdown(f"[{course['name']}]({course['url']})")
-
-# Resume Tips & Ideas
-st.header("Resume Tips & Ideas 💡")
-tips = [
-    ("Objective/Summary", True),
-    ("Education Details", True),
-    ("Experience", True),
-    ("Internships", True),
-    ("Skills", True),
-    ("Hobbies", False),
-    ("Interest", False),
-    ("Achievements", False),
-    ("Certifications", False),
-    ("Projects", True)
-]
-for tip, status in tips:
-    if status:
-        st.markdown(f"[+] **Awesome! You have added {tip}**")
+    if response.status_code == 200:
+        try:
+            return json.loads(response.json()["choices"][0]["message"]["content"])
+        except (KeyError, json.JSONDecodeError):
+            return {"error": "Invalid JSON response from API."}
     else:
-        st.markdown(f"[-] **Please add {tip}.**")
+        return {"error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}",}
 
-# Resume Score
-st.header("Resume Score 📝")
-resume_score = 66
-st.markdown(f"**Your Resume Writing Score: {resume_score}**")
+# ------------------------
+# PDF Text Extraction
+# ------------------------
+def extract_text_from_pdf(uploaded_file):
+    if uploaded_file is not None:
+        with open("temp_resume.pdf", "wb") as f:
+            f.write(uploaded_file.getbuffer())  # Save uploaded file locally
+        extracted_text = extract_text("temp_resume.pdf")
+        return extracted_text
+    else:
+        return "No file uploaded."
 
-# Score Progress Bar
-st.progress(resume_score / 100)
+# ------------------------
+# Streamlit App
+# ------------------------
+st.set_page_config(page_title="Smart Resume Analyzer", page_icon="📄")
 
-# Final Note
-st.info("**Note: This score is calculated based on the content that you have in your Resume.**")
+st.sidebar.title("User Mode")
+mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
+
+if mode == "User":
+    st.title("📄 Smart Resume Analyzer")
+    uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
+
+    if uploaded_file:
+        st.success("File uploaded successfully!")
+        
+        resume_text = extract_text_from_pdf(uploaded_file)
+        st.subheader("Extracted Resume Text")
+        st.text(resume_text[:500] + "...")
+
+        if st.button("Analyze Resume"):
+            with st.spinner("Analyzing resume..."):
+                result = get_resume_analysis(resume_text)
+
+            if "error" in result:
+                st.error(result["error"])
+            else:
+                st.success("Resume Analyzed Successfully!")
+                basic_info = result.get("basic_info", {})
+                skills = result.get("skills", {})
+                courses = result.get("course_recommendations", [])
+                resume_score = int(result.get("resume_score", "70").split("/")[0])
+
+                # Display results
+                st.header("Basic Info")
+                st.write(basic_info)
+                st.header("Skills")
+                st.write(skills)
+                st.header("Recommended Courses")
+                for course in courses:
+                    st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
+                st.header("Resume Score")
+                st.metric(label="Score", value=f"{resume_score}/100")
+
+                # Save to database
+                cursor.execute('''
+                    INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, timestamp)
+                    VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+                ''', (
+                    basic_info.get("name", "N/A"),
+                    basic_info.get("email", "N/A"),
+                    resume_score,
+                    ", ".join(skills.get("current_skills", [])),
+                    ", ".join(skills.get("recommended_skills", [])),
+                    ", ".join([course['course_name'] for course in courses])
+                ))
+                conn.commit()
+
+elif mode == "Admin":
+    st.title("🔐 Admin Dashboard")
+    admin_user = st.text_input("Username")
+    admin_pass = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        if admin_user == "admin" and admin_pass == "admin123":
+            st.success("Logged in as Admin")
+
+            # Fetch data from DB
+            cursor.execute("SELECT * FROM user_data")
+            data = cursor.fetchall()
+            df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume Score', 'Skills', 'Recommended Skills', 'Courses', 'Timestamp'])
+
+            st.header("User Data")
+            st.dataframe(df)
+
+            # Visualizations
+            st.subheader("Resume Score Distribution")
+            st.bar_chart(df['Resume Score'])
+        else:
+            st.error("Invalid Admin Credentials")
