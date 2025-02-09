@@ -8,7 +8,7 @@ st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 # Initialize the OpenAI client with API Key
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key="sk-or-your_actual_api_key_here"
+    api_key="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"
 )
 
 # Session state for managing conversation
@@ -30,15 +30,16 @@ if user_input:
     # Get AI response
     with st.spinner("Generating response..."):
         completion = client.chat.completions.create(
-            model="openai/chatgpt-4o-latest",
+            extra_headers={
+                "HTTP-Referer": "https://your-site-url.com",  # Optional. Site URL for rankings on openrouter.ai.
+                "X-Title": "DeepSeek Chatbot"  # Optional. Site title for rankings on openrouter.ai.
+            },
+            extra_body={},
+            model="deepseek/deepseek-r1-distill-llama-70b:free",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 *st.session_state.message_log
-            ],
-            extra_headers={
-                "HTTP-Referer": "<YOUR_SITE_URL>",  # Optional, replace or remove if unnecessary
-                "X-Title": "<YOUR_SITE_NAME>"       # Optional, replace or remove if unnecessary
-            }
+            ]
         )
         response = completion.choices[0].message.content
 
