@@ -1,28 +1,31 @@
-import streamlit as st
-import requests
-from pdfminer.high_level import extract_text
-
 # Streamlit App Title
-st.title("DeepSeek API Test for Resume")
-st.caption("Check API connectivity with a resume file")
+st.title("DeepSeek Chatbot")
+st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 
-# Secure API Key from secrets.toml
+# API Configuration
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = st.secrets["api_key"]  # Securely accessing the API key
+API_KEY = st.secrets["API_KEY"]  # Make sure your API key is securely stored in .streamlit/secrets.toml
 
-# Upload PDF
-uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
+# Initialize message log in session state
+if "message_log" not in st.session_state:
+    st.session_state.message_log = [{"role": "ai", "content": "Hello! How can I assist you today? ðŸ˜Š"}]
 
-# Extract text from PDF
-def extract_resume_text(uploaded_file):
-    with open("temp_resume.pdf", "wb") as f:
-        f.write(uploaded_file.getbuffer())
-    return extract_text("temp_resume.pdf")
+# Display Chat History
+for message in st.session_state.message_log:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# API Call Function
-def call_api(resume_text):
-    prompt = f"Here's a sample resume text:\n\n{resume_text[:500]}\n\nCan you briefly summarize this resume?"
+# User Input
+user_input = st.chat_input("Type your message and press Enter...")
 
+if user_input:
+    # Display user input immediately
+    st.session_state.message_log.append({"role": "user", "content": user_input})
+    
+    with st.chat_message("user"):
+        st.markdown(user_input)
+
+    # Prepare API request
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
@@ -30,24 +33,33 @@ def call_api(resume_text):
 
     payload = {
         "model": "deepseek/deepseek-r1-distill-llama-70b:free",
-        "messages": [{"role": "user", "content": prompt}]
+        "messages": st.session_state.message_log
     }
 
-    try:
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=15)
-        response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"]
-    except requests.exceptions.RequestException as e:
-        return f"API Error: {e}"
+    # Get AI response
+    with st.spinner("Generating response..."):
+        response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
 
-# Display and Test API
-if uploaded_file:
-    st.success("Resume uploaded successfully!")
-    resume_text = extract_resume_text(uploaded_file)
+    # Error Handling
+    if response.status_code == 200:
+        response_data = response.json()
+        
+        if "choices" in response_data:
+            ai_response = response_data["choices"][0]["message"]["content"]
+            st.session_state.message_log.append({"role": "ai", "content": ai_response})
 
-    if st.button("Test API Connection"):
-        with st.spinner("Sending request to API..."):
-            result = call_api(resume_text)
-
-        st.subheader("API Response:")
-        st.write(result)
+            with st.chat_message("ai"):
+                st.markdown(ai_response)
+        else:
+            error_message = response_data.get("error", {}).get("message", "Unexpected response structure.")
+            st.session_state.message_log.append({"role": "ai", "content": f"Error: {error_message}"})
+            
+            with st.chat_message("ai"):
+                st.markdown(f"Error: {error_message}")
+    else:
+        # Handle HTTP errors
+        error_message = response.json().get('error', {}).get('message', f"HTTP {response.status_code} Error")
+        st.session_state.message_log.append({"role": "ai", "content": f"Error: {error_message}"})
+        
+        with st.chat_message("ai"):
+            st.markdown(f"Error: {error_message}")
