@@ -5,7 +5,7 @@ st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 
 # API Configuration
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = st.secrets["API_KEY"]  # Make sure your API key is securely stored in .streamlit/secrets.toml
+API_KEY = "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" # Make sure your API key is securely stored in .streamlit/secrets.toml
 
 # Initialize message log in session state
 if "message_log" not in st.session_state:
