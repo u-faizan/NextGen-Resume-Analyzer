@@ -25,4 +25,4 @@ if uploaded_file:
     # Extract and display text
     resume_text = extract_text_from_pdf(uploaded_file)
     st.subheader("Extracted Resume Text")
-    st.text(resume_text[:500] + "...")
+    st.text(resume_text[:1500] + "...")
