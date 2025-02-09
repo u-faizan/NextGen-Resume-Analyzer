@@ -4,7 +4,7 @@ import json
 import sqlite3
 import pandas as pd
 from PIL import Image
-import pymupdf as fitz  # PyMuPDF for PDF text extraction
+import fitz  # PyMuPDF for PDF text extraction
 
 # ------------------------
 # Database Setup
