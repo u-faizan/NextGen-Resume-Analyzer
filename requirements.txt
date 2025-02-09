@@ -2,3 +2,4 @@ streamlit
 pdfminer
 pdfminer.six
 openai
+pymysql
