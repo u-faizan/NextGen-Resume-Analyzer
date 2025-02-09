@@ -3,3 +3,6 @@ pdfminer
 pdfminer.six
 openai
 pymysql
+jason
+pandas
+
