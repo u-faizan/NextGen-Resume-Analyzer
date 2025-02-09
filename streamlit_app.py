@@ -8,24 +8,24 @@ st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 
 # API Configuration
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = st.secrets["api"]["api_key"]  # Securely accessing API key from secrets
+API_KEY = st.secrets["api"]["api_key"]  # Ensure API key is securely stored in .streamlit/secrets.toml
 
-# Display API Key (for debugging, show only first 5 characters)
+# Verify API Key is Loaded (for debugging)
 st.write(f"API Key Loaded: {API_KEY[:5]}***")
 
-# Prepare API request without 'Bearer'
+# Prepare API request with Bearer prefix
 headers = {
-    "Authorization": API_KEY,  # No 'Bearer' prefix
+    "Authorization": f"Bearer {API_KEY}",
     "Content-Type": "application/json"
 }
 
-# Simple payload for testing
+# Simple payload to test the API
 payload = {
     "model": "deepseek/deepseek-r1-distill-llama-70b:free",
     "messages": [{"role": "user", "content": "Hello, how are you?"}]
 }
 
-# Make API Request
+# Send request to the API
 response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
 
 # Handle API Response
