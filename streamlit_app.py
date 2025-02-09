@@ -2,12 +2,25 @@ import streamlit as st
 import requests
 from pdfminer.high_level import extract_text
 
-# API Configuration
-API_KEY = "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"  # Replace with your API Key
-API_URL = "https://openrouter.ai/api/v1/chat/completions"
+# Streamlit App Title
+st.title("DeepSeek API Test for Resume")
+st.caption("Check API connectivity with a resume file")
 
-# Function to Test API Connection
-def test_api_connection(resume_text):
+# Secure API Key from secrets.toml
+API_URL = "https://openrouter.ai/api/v1/chat/completions"
+API_KEY = st.secrets["api_key"]  # Securely accessing the API key
+
+# Upload PDF
+uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
+
+# Extract text from PDF
+def extract_resume_text(uploaded_file):
+    with open("temp_resume.pdf", "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    return extract_text("temp_resume.pdf")
+
+# API Call Function
+def call_api(resume_text):
     prompt = f"Here's a sample resume text:\n\n{resume_text[:500]}\n\nCan you briefly summarize this resume?"
 
     headers = {
@@ -21,32 +34,20 @@ def test_api_connection(resume_text):
     }
 
     try:
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=10)
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=15)
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
     except requests.exceptions.RequestException as e:
         return f"API Error: {e}"
 
-# Streamlit Interface
-st.title("📄 API Test for Resume Analyzer")
-uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
+# Display and Test API
+if uploaded_file:
+    st.success("Resume uploaded successfully!")
+    resume_text = extract_resume_text(uploaded_file)
 
-# Ensure API call only triggers on button click
-if "api_called" not in st.session_state:
-    st.session_state.api_called = False
+    if st.button("Test API Connection"):
+        with st.spinner("Sending request to API..."):
+            result = call_api(resume_text)
 
-if uploaded_file and st.button("Test API Connection"):
-    with open("temp_resume.pdf", "wb") as f:
-        f.write(uploaded_file.getbuffer())
-    resume_text = extract_text("temp_resume.pdf")
-
-    with st.spinner("Sending request to API..."):
-        result = test_api_connection(resume_text)
-    
-    st.session_state.api_called = True
-    st.session_state.api_result = result
-
-# Display result only after API call
-if st.session_state.api_called:
-    st.subheader("API Response:")
-    st.write(st.session_state.api_result)
+        st.subheader("API Response:")
+        st.write(result)
