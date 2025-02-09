@@ -1,6 +1,9 @@
 import streamlit as st
 import requests
 import json
+from streamlit_tags import st_tags
+from PIL import Image
+import pymysql
 
 # Streamlit App Title
 st.title("DeepSeek Chatbot")
