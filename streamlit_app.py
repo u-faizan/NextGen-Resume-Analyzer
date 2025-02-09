@@ -80,13 +80,13 @@ def extract_text_from_pdf(uploaded_file):
 # ------------------------
 # Streamlit App
 # ------------------------
-st.set_page_config(page_title="Smart Resume Analyzer", page_icon="\ud83d\udcc4")
+st.set_page_config(page_title="Smart Resume Analyzer", page_icon="📄")
 
 st.sidebar.title("User Mode")
 mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 
 if mode == "User":
-    st.title("\ud83d\udcc4 Smart Resume Analyzer")
+    st.title("📄 Smart Resume Analyzer")
     uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
 
     if uploaded_file:
@@ -135,7 +135,7 @@ if mode == "User":
                 conn.commit()
 
 elif mode == "Admin":
-    st.title("\ud83d\udd10 Admin Dashboard")
+    st.title("🔐 Admin Dashboard")
     admin_user = st.text_input("Username")
     admin_pass = st.text_input("Password", type="password")
 
