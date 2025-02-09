@@ -1,47 +1,53 @@
 import streamlit as st
-from openai import OpenAI
+import requests
+import json
 
-# Streamlit App
+# Streamlit App Title
 st.title("DeepSeek Chatbot")
+st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 
-# Initialize the OpenAI client with API Key
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key="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",
-)
+# API Configuration
+API_URL = "https://openrouter.ai/api/v1/chat/completions"
+API_KEY = "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"  # Replace with your actual key
 
-# Session state for managing conversation
+# Initialize message log in session state
 if "message_log" not in st.session_state:
     st.session_state.message_log = [{"role": "ai", "content": "Hello! How can I assist you today?"}]
 
-# Display chat messages
+# Display Chat History
 for message in st.session_state.message_log:
-    st.write(f"**{message['role'].capitalize()}:** {message['content']}")
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-# Chat input
-user_input = st.text_input("Type your message here...")
+# User Input
+user_input = st.chat_input("Type your message here...")
 
+# Only send API request if user_input exists
 if user_input:
-    # Add user message to log
+    # Add user message to the session log
     st.session_state.message_log.append({"role": "user", "content": user_input})
 
-    # Get AI response
-    try:
-        completion = client.chat.completions.create(
-            model="deepseek/deepseek-r1-distill-llama-70b:free",
-            messages=st.session_state.message_log,
-            extra_headers={
-                "HTTP-Referer": "<YOUR_SITE_URL>",
-                "X-Title": "<YOUR_SITE_NAME>",
-            }
-        )
-        response = completion.choices[0].message.content
-    
-        # Add AI response to log
-        st.session_state.message_log.append({"role": "ai", "content": response})
-    
-    except Exception as e:
-        st.error(f"Error: {e}")
+    # Prepare API Request
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
 
-    # Rerun to update chat display
+    payload = {
+        "model": "deepseek/deepseek-r1-distill-llama-70b:free",
+        "messages": st.session_state.message_log
+    }
+
+    # Get AI response
+    with st.spinner("Generating response..."):
+        response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
+
+    if response.status_code == 200:
+        ai_response = response.json()["choices"][0]["message"]["content"]
+        st.session_state.message_log.append({"role": "ai", "content": ai_response})
+    else:
+        ai_response = f"Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}"
+        st.session_state.message_log.append({"role": "ai", "content": ai_response})
+
+    # Rerun to display the new messages
     st.experimental_rerun()
