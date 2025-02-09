@@ -1,10 +1,9 @@
 streamlit
 streamlit_tags
-pdfminer
-pdfminer.six
-pdfminer.high_level
+python==3.10
+PyMuPDF
 openai
 pymysql
-jason
 pandas
-
+requests
+Pillow
