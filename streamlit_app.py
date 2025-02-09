@@ -2,7 +2,7 @@ import streamlit as st
 from openai import OpenAI
 
 # Streamlit App
-st.title("DeepSeek Chatbot")
+st.title("DeepSeek")
 st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 
 # Initialize the OpenAI client with API Key
