@@ -123,7 +123,19 @@ if mode == "User":
                 basic_info = result.get("basic_info", {})
                 skills = result.get("skills", {})
                 courses = result.get("course_recommendations", [])
-                resume_score = int(result.get("resume_score", "70").split("/")[0])
+                # Safe extraction of resume_score
+                resume_score_raw = result.get("resume_score", "70/100")  # Default to "70/100" if missing
+                
+                if isinstance(resume_score_raw, int):
+                    resume_score = resume_score_raw  # Use directly if already an integer
+                elif isinstance(resume_score_raw, str):
+                    # Extract numeric value from string formats like "7/10" or "85/100"
+                    import re
+                    score_match = re.search(r'\d+', resume_score_raw)
+                    resume_score = int(score_match.group()) if score_match else 70  # Default to 70 if no number found
+                else:
+                    resume_score = 70  # Fallback if format is unexpected
+
 
                 # Display results
                 st.header("Basic Info")
