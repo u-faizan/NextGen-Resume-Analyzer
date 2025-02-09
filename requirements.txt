@@ -1,6 +1,6 @@
 streamlit
 streamlit_tags
-python==3.10
+python
 PyMuPDF
 openai
 pymysql
