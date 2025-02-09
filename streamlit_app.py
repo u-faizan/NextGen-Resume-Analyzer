@@ -3,7 +3,7 @@ import requests
 from pdfminer.high_level import extract_text
 
 # API Configuration
-API_KEY = "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"  # Replace with your API Key
+API_KEY = "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"  # Replace with your API Key
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Function to Test API Connection
