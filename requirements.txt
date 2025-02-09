@@ -1,11 +1,10 @@
 streamlit
-pandas
 requests
-pdfminer.six
+pandas
 Pillow
+pdfminer.six
 openai
 sqlite3
-
 
 
 
