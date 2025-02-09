@@ -15,7 +15,7 @@ def test_api_connection(resume_text):
     prompt = f"Here's a sample resume text:\n\n{resume_text[:500]}\n\nCan you briefly summarize this resume?"
 
     headers = {
-        "Authorization": f"Bearer {API_KEY},
+        "Authorization": f"Bearer {API_KEY}", 
         "Content-Type": "application/json"
     }
 
