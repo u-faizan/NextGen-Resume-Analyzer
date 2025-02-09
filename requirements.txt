@@ -1,6 +1,10 @@
 streamlit
-pdfminer.six
+pandas
 requests
+pdfminer.six
+Pillow
+openai
+
 
 
 
