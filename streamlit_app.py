@@ -3,7 +3,7 @@ import requests
 from pdfminer.high_level import extract_text
 
 # Read API Key from secrets
-API_KEY = st.secrets["api"]["api_key"]
+API_KEY = st.secrets["api_key"]
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 def test_api_connection(resume_text):
