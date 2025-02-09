@@ -32,6 +32,9 @@ API_URL = "https://openrouter.ai/api/v1/chat/completions"
 API_KEY = st.secrets["API_KEY"]  # Securely accessing API key from secrets
 
 # Function to call API
+import re
+
+# Function to call API
 def get_resume_analysis(resume_text):
     prompt = f"""
     You are an expert resume analyzer. Extract and output the following information strictly in JSON format:
@@ -46,7 +49,7 @@ def get_resume_analysis(resume_text):
     """
 
     headers = {
-        "Authorization": f"Bearer {API_KEY}",  # Ensure the Bearer prefix is included
+        "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
 
@@ -59,11 +62,23 @@ def get_resume_analysis(resume_text):
 
     if response.status_code == 200:
         try:
-            return json.loads(response.json()["choices"][0]["message"]["content"])
+            # Extract JSON content using regex in case of extra text
+            raw_response = response.json()["choices"][0]["message"]["content"]
+            json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)  # Find JSON part
+
+            if json_match:
+                json_text = json_match.group(0)  # Extract JSON part
+                return json.loads(json_text)  # Convert JSON string to dictionary
+            else:
+                return {"error": "No valid JSON found in API response."}
+
         except (KeyError, json.JSONDecodeError):
             return {"error": "Invalid JSON response from API."}
     else:
-        return {"error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}",}
+        return {
+            "error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}",
+        }
+
 
 # ------------------------
 # PDF Text Extraction
