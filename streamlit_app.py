@@ -4,7 +4,6 @@ import json
 import sqlite3
 import pandas as pd
 from pdfminer.high_level import extract_text
-from PIL import Image
 import re
 
 # ------------------------
@@ -38,7 +37,7 @@ def get_resume_analysis(resume_text):
     You are an expert resume analyzer. Extract and output the following information **strictly in JSON format**. **Do not include any explanations, comments, or additional text** outside the JSON block.
 
     **Allowed JSON keys are ONLY the following. Do not create new keys or modify these key names:**
-    "basic_info", "skills", "course_recommendations", "appreciation", "resume_tips", "resume_score", "ai_resume_summary", "matching_job_roles", "ats_keywords", "project_suggestions"
+    "basic_info", "skills", "course_recommendations", "resume_score"
 
     Here’s the required JSON structure:
     {{
@@ -74,7 +73,6 @@ def get_resume_analysis(resume_text):
 
     if response.status_code == 200:
         try:
-            # Extract JSON content using regex
             raw_response = response.json()["choices"][0]["message"]["content"]
             json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
 
@@ -138,8 +136,10 @@ if mode == "User":
                 st.header("Skills")
                 st.write(skills)
                 st.header("Recommended Courses")
-                for course in courses:
-                    st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
+                if isinstance(courses, list):
+                    for course in courses:
+                        if isinstance(course, dict) and "platform" in course and "course_name" in course and "link" in course:
+                            st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
                 st.header("Resume Score")
                 st.metric(label="Score", value=f"{resume_score}/100")
 
@@ -153,7 +153,7 @@ if mode == "User":
                     resume_score,
                     ", ".join(skills.get("current_skills", [])),
                     ", ".join(skills.get("recommended_skills", [])),
-                    ", ".join([course['course_name'] for course in courses])
+                    ", ".join([course.get('course_name', 'Unknown') for course in courses])
                 ))
                 conn.commit()
 
