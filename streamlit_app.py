@@ -5,7 +5,7 @@ from pdfminer.high_level import extract_text
 
 def extract_text_from_pdf(uploaded_file):
     if uploaded_file is not None:
-        with open("temp_resume.pdf", "wb",encoding="utf-8") as f:
+        with open("temp_resume.pdf", "w",encoding="utf-8") as f:
             f.write(uploaded_file.getbuffer())  # Save uploaded file locally
         
         # Extract text from the saved PDF
