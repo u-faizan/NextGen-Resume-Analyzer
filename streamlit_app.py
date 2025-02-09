@@ -130,8 +130,25 @@ if mode == "User":
                 st.header("Skills")
                 st.write(skills)
                 st.header("Recommended Courses")
-                for course in courses:
-                    st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
+                # Ensure courses is a list
+                courses = result.get("course_recommendations", [])
+                
+                if isinstance(courses, str):
+                    try:
+                        courses = json.loads(courses)  # Convert string to list if necessary
+                    except json.JSONDecodeError:
+                        courses = []  # Default to empty list if parsing fails
+                
+                # Display recommended courses safely
+                st.header("Recommended Courses")
+                if isinstance(courses, list):
+                    for course in courses:
+                        if isinstance(course, dict) and "platform" in course and "course_name" in course and "link" in course:
+                            st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
+                        else:
+                            st.warning("Unexpected course data format.")
+                else:
+                    st.warning("No valid courses found.")
                 # Extract and validate resume score
                 resume_score_raw = result.get("resume_score", "70/100")  # Default to "70/100" if missing
                 
