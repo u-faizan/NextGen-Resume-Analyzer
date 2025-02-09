@@ -3,8 +3,9 @@ import requests
 import json
 import sqlite3
 import pandas as pd
-import re
 from pdfminer.high_level import extract_text
+from PIL import Image
+import re
 
 # ------------------------
 # Database Setup
@@ -29,19 +30,33 @@ conn.commit()
 # API Configuration
 # ------------------------
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = st.secrets["API_KEY"]
+API_KEY = st.secrets["API_KEY"]  # Securely accessing API key from secrets
 
 # Function to call API
 def get_resume_analysis(resume_text):
     prompt = f"""
-    You are an expert resume analyzer. Extract and return the following information strictly in JSON format:
+    You are an expert resume analyzer. Extract and output the following information **strictly in JSON format**. **Do not include any explanations, comments, or additional text** outside the JSON block.
+
+    **Allowed JSON keys are ONLY the following. Do not create new keys or modify these key names:**
+    "basic_info", "skills", "course_recommendations", "appreciation", "resume_tips", "resume_score", "ai_resume_summary", "matching_job_roles", "ats_keywords", "project_suggestions"
+
+    Here’s the required JSON structure:
     {{
-        "basic_info": {{ "name": string, "email": string }},
-        "skills": {{ "current_skills": list, "recommended_skills": list }},
+        "basic_info": {{
+            "name": string,
+            "email": string
+        }},
+        "skills": {{
+            "current_skills": list,
+            "recommended_skills": list
+        }},
         "course_recommendations": list,
         "resume_score": string
     }}
-    Resume text:
+
+    **Return only valid JSON and nothing else.**
+
+    Here is the resume text:
     '''{resume_text}'''
     """
 
@@ -59,14 +74,17 @@ def get_resume_analysis(resume_text):
 
     if response.status_code == 200:
         try:
-            # Extract JSON content from response
-            json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+            # Extract JSON content using regex
+            raw_response = response.json()["choices"][0]["message"]["content"]
+            json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
+
             if json_match:
                 json_text = json_match.group(0)
                 return json.loads(json_text)
             else:
                 return {"error": "No valid JSON found in API response."}
-        except json.JSONDecodeError:
+
+        except (KeyError, json.JSONDecodeError):
             return {"error": "Invalid JSON response from API."}
     else:
         return {"error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}"}
@@ -77,10 +95,11 @@ def get_resume_analysis(resume_text):
 def extract_text_from_pdf(uploaded_file):
     if uploaded_file is not None:
         with open("temp_resume.pdf", "wb") as f:
-            f.write(uploaded_file.getbuffer())  # Save uploaded file locally
+            f.write(uploaded_file.getbuffer())
         extracted_text = extract_text("temp_resume.pdf")
-        return extracted_text.strip() if extracted_text else "No text extracted."
-    return "No file uploaded."
+        return extracted_text
+    else:
+        return "No file uploaded."
 
 # ------------------------
 # Streamlit App
@@ -96,7 +115,6 @@ if mode == "User":
 
     if uploaded_file:
         st.success("File uploaded successfully!")
-
         resume_text = extract_text_from_pdf(uploaded_file)
         st.subheader("Extracted Resume Text")
         st.text(resume_text[:500] + "...")
@@ -109,42 +127,19 @@ if mode == "User":
                 st.error(result["error"])
             else:
                 st.success("Resume Analyzed Successfully!")
-
-                # Extract and display results
                 basic_info = result.get("basic_info", {})
                 skills = result.get("skills", {})
                 courses = result.get("course_recommendations", [])
-                resume_score_raw = result.get("resume_score", "70/100")
+                resume_score = int(result.get("resume_score", "70").split("/")[0])
 
-                # Extract resume score safely
-                resume_score = 70  # Default
-                if isinstance(resume_score_raw, str):
-                    resume_score_match = re.search(r'\d+', resume_score_raw)
-                    if resume_score_match:
-                        resume_score = int(resume_score_match.group())
-
-                # Display extracted information
+                # Display results
                 st.header("Basic Info")
-                st.write(f"**Name:** {basic_info.get('name', 'Not Found')}")
-                st.write(f"**Email:** {basic_info.get('email', 'Not Found')}")
-
+                st.write(basic_info)
                 st.header("Skills")
-                current_skills = skills.get("current_skills", [])
-                recommended_skills = skills.get("recommended_skills", [])
-
-                st.write(f"**Current Skills:** {', '.join(current_skills) if current_skills else 'Not Found'}")
-                st.write(f"**Recommended Skills:** {', '.join(recommended_skills) if recommended_skills else 'Not Found'}")
-
+                st.write(skills)
                 st.header("Recommended Courses")
-                if isinstance(courses, list) and courses:
-                    for course in courses:
-                        if isinstance(course, dict) and all(k in course for k in ["platform", "course_name", "link"]):
-                            st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
-                        else:
-                            st.warning("Unexpected course data format.")
-                else:
-                    st.warning("No course recommendations available.")
-
+                for course in courses:
+                    st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
                 st.header("Resume Score")
                 st.metric(label="Score", value=f"{resume_score}/100")
 
@@ -153,12 +148,12 @@ if mode == "User":
                     INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, timestamp)
                     VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
                 ''', (
-                    basic_info.get("name", "Unknown"),
-                    basic_info.get("email", "Unknown"),
+                    basic_info.get("name", "N/A"),
+                    basic_info.get("email", "N/A"),
                     resume_score,
-                    ", ".join(current_skills),
-                    ", ".join(recommended_skills),
-                    ", ".join([course['course_name'] for course in courses if isinstance(course, dict)])
+                    ", ".join(skills.get("current_skills", [])),
+                    ", ".join(skills.get("recommended_skills", [])),
+                    ", ".join([course['course_name'] for course in courses])
                 ))
                 conn.commit()
 
@@ -170,16 +165,11 @@ elif mode == "Admin":
     if st.button("Login"):
         if admin_user == "admin" and admin_pass == "admin123":
             st.success("Logged in as Admin")
-
-            # Fetch data from DB
             cursor.execute("SELECT * FROM user_data")
             data = cursor.fetchall()
             df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume Score', 'Skills', 'Recommended Skills', 'Courses', 'Timestamp'])
-
             st.header("User Data")
             st.dataframe(df)
-
-            # Visualizations
             st.subheader("Resume Score Distribution")
             st.bar_chart(df['Resume Score'])
         else:
