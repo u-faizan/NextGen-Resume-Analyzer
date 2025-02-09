@@ -1,7 +1,7 @@
 streamlit
 streamlit_tags
 python==3.10
-PyMuPDF
+PyMuPDF==1.22.5
 openai
 pymysql
 pandas
