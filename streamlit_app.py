@@ -3,6 +3,7 @@ import requests
 import json
 import sqlite3
 import pandas as pd
+import re
 from pdfminer.high_level import extract_text
 from PIL import Image
 
@@ -32,9 +33,6 @@ API_URL = "https://openrouter.ai/api/v1/chat/completions"
 API_KEY = st.secrets["API_KEY"]  # Securely accessing API key from secrets
 
 # Function to call API
-import re
-
-# Function to call API
 def get_resume_analysis(resume_text):
     prompt = f"""
     You are an expert resume analyzer. Extract and output the following information strictly in JSON format:
@@ -62,23 +60,17 @@ def get_resume_analysis(resume_text):
 
     if response.status_code == 200:
         try:
-            # Extract JSON content using regex in case of extra text
-            raw_response = response.json()["choices"][0]["message"]["content"]
-            json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)  # Find JSON part
-
+            # Extract valid JSON using regex
+            json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
             if json_match:
-                json_text = json_match.group(0)  # Extract JSON part
-                return json.loads(json_text)  # Convert JSON string to dictionary
+                json_text = json_match.group(0)
+                return json.loads(json_text)
             else:
                 return {"error": "No valid JSON found in API response."}
-
         except (KeyError, json.JSONDecodeError):
             return {"error": "Invalid JSON response from API."}
     else:
-        return {
-            "error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}",
-        }
-
+        return {"error": f"API Error {response.status_code}: {response.json().get('error', {}).get('message', 'Unknown error')}"}
 
 # ------------------------
 # PDF Text Extraction
@@ -88,9 +80,8 @@ def extract_text_from_pdf(uploaded_file):
         with open("temp_resume.pdf", "wb") as f:
             f.write(uploaded_file.getbuffer())  # Save uploaded file locally
         extracted_text = extract_text("temp_resume.pdf")
-        return extracted_text
-    else:
-        return "No file uploaded."
+        return extracted_text if extracted_text.strip() else "No text extracted from the PDF."
+    return "No file uploaded."
 
 # ------------------------
 # Streamlit App
@@ -106,7 +97,7 @@ if mode == "User":
 
     if uploaded_file:
         st.success("File uploaded successfully!")
-        
+
         resume_text = extract_text_from_pdf(uploaded_file)
         st.subheader("Extracted Resume Text")
         st.text(resume_text[:500] + "...")
@@ -122,43 +113,44 @@ if mode == "User":
                 basic_info = result.get("basic_info", {})
                 skills = result.get("skills", {})
                 courses = result.get("course_recommendations", [])
-                resume_score = int(result.get("resume_score", "70").split("/")[0])
+                resume_score_raw = result.get("resume_score", "70/100")
+
+                # Ensure resume_score is properly extracted as an integer
+                if isinstance(resume_score_raw, int):
+                    resume_score = resume_score_raw
+                elif isinstance(resume_score_raw, str):
+                    resume_score_match = re.search(r'\d+', resume_score_raw)
+                    resume_score = int(resume_score_match.group()) if resume_score_match else 70
+                else:
+                    resume_score = 70
 
                 # Display results
                 st.header("Basic Info")
-                st.write(basic_info)
+                st.write(f"**Name:** {basic_info.get('name', 'N/A')}")
+                st.write(f"**Email:** {basic_info.get('email', 'N/A')}")
+
                 st.header("Skills")
-                st.write(skills)
+                st.write(f"**Current Skills:** {', '.join(skills.get('current_skills', [])) or 'N/A'}")
+                st.write(f"**Recommended Skills:** {', '.join(skills.get('recommended_skills', [])) or 'N/A'}")
+
                 st.header("Recommended Courses")
-                # Ensure courses is a list
-                courses = result.get("course_recommendations", [])
-                
                 if isinstance(courses, str):
                     try:
                         courses = json.loads(courses)  # Convert string to list if necessary
                     except json.JSONDecodeError:
-                        courses = []  # Default to empty list if parsing fails
-                
-                # Display recommended courses safely
-                st.header("Recommended Courses")
+                        courses = []
+
                 if isinstance(courses, list):
                     for course in courses:
-                        if isinstance(course, dict) and "platform" in course and "course_name" in course and "link" in course:
+                        if isinstance(course, dict) and all(k in course for k in ["platform", "course_name", "link"]):
                             st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
                         else:
                             st.warning("Unexpected course data format.")
                 else:
                     st.warning("No valid courses found.")
-                # Extract and validate resume score
-                resume_score_raw = result.get("resume_score", "70/100")  # Default to "70/100" if missing
-                
-                if isinstance(resume_score_raw, int):  
-                    resume_score = resume_score_raw  # If already an integer, use directly
-                elif isinstance(resume_score_raw, str):  
-                    resume_score_match = re.search(r'\d+', resume_score_raw)  # Extract numeric value
-                    resume_score = int(resume_score_match.group()) if resume_score_match else 70  # Default to 70 if extraction fails
-                else:
-                    resume_score = 70  # Fallback in case of unexpected format
+
+                st.header("Resume Score")
+                st.metric(label="Score", value=f"{resume_score}/100")
 
                 # Save to database
                 cursor.execute('''
@@ -170,7 +162,7 @@ if mode == "User":
                     resume_score,
                     ", ".join(skills.get("current_skills", [])),
                     ", ".join(skills.get("recommended_skills", [])),
-                    ", ".join([course['course_name'] for course in courses])
+                    ", ".join([course['course_name'] for course in courses if isinstance(course, dict)])
                 ))
                 conn.commit()
 
