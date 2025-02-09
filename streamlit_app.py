@@ -1,14 +1,15 @@
 import streamlit as st
-import requests
-import json
+from openai import OpenAI
 
 # Streamlit App
 st.title("DeepSeek Chatbot")
 st.caption("Chat with the Deepseek R1 model powered by OpenRouter API")
 
-# API Configuration
-API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = "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"
+# Initialize the OpenAI client with API Key
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key="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"
+)
 
 # Session state for managing conversation
 if "message_log" not in st.session_state:
@@ -26,33 +27,23 @@ if user_input:
     # Add user message to log
     st.session_state.message_log.append({"role": "user", "content": user_input})
 
-    # Prepare API Request
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "model": "deepseek/deepseek-r1-distill-llama-70b:free",
-        "messages": [
-            {"role": "system", "content": "You are a helpful assistant."},
-            *st.session_state.message_log
-        ],
-        "temperature": 0.7,
-        "top_p": 0.95
-    }
-
     # Get AI response
     with st.spinner("Generating response..."):
-        response = requests.post(API_URL, headers=headers, data=json.dumps(payload))
-
-        if response.status_code == 200:
-            ai_response = response.json()["choices"][0]["message"]["content"]
-        else:
-            ai_response = f"Error: {response.status_code} - {response.json().get('error', {}).get('message', 'Unknown error')}"
+        completion = client.chat.completions.create(
+            extra_headers={
+                "HTTP-Referer": "<YOUR_SITE_URL>",  # Optional. Site URL for rankings on openrouter.ai.
+                "X-Title": "<YOUR_SITE_NAME>",  # Optional. Site title for rankings on openrouter.ai.
+            },
+            model="openai/chatgpt-4o-latest",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                *st.session_state.message_log
+            ]
+        )
+        response = completion.choices[0].message.content
 
     # Add AI response to log
-    st.session_state.message_log.append({"role": "assistant", "content": ai_response})
+    st.session_state.message_log.append({"role": "assistant", "content": response})
 
     # Rerun to update chat display
     st.rerun()
