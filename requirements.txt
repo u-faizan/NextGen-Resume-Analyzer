@@ -5,6 +5,7 @@ requests
 Pillow
 pymysql
 pandas
+matplotlib
 
 
 
