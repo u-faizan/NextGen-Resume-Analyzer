@@ -161,15 +161,12 @@ st.sidebar.title("User Mode")
 st.markdown(
     """
     <style>
-        .stSidebar {
-            background-color: #1ABC9C !important; /* Teal Color Button */
-        }
-        .stButton > button {
-            background-color: #1ABC9C !important; /* Teal Color Button */
+        [data-testid="stSidebar"] {
+            background-color: #15967D !important; /* Darker Teal */
             color: white !important;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 8px 20px;
+        }
+        [data-testid="stSidebar"] * {
+            color: white !important; /* Sidebar text color */
         }
     </style>
     """,
