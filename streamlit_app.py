@@ -356,7 +356,7 @@ elif mode == "Admin":
                 ax.set_title(title)
             
             # Creating subplots to maintain the same figure size
-            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+            fig, axes = plt.subplots(1, 2, figsize=(16, 8))
             
             # Plot both charts with the same size
             plot_pie(axes[0], top_current_skills, "Current Skills")
