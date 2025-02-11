@@ -1,10 +1,13 @@
 streamlit
-requests
-pandas
-Pillow
+pdf2image
+pypdf2
 pdfminer.six
 openai
+requests
+Pillow
 pymysql
+pandas
+
 
 
 
