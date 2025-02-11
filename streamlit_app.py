@@ -4,6 +4,7 @@ import requests
 import json
 import sqlite3
 import pandas as pd
+import matplotlib.pyplot as plt
 from pdfminer.high_level import extract_text
 import re
 import os
