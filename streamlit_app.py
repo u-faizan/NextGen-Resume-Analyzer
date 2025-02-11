@@ -329,30 +329,38 @@ elif mode == "Admin":
             st.subheader("Resume Score Distribution")
             st.bar_chart(df['Resume Score'])
 
+
             # Top Skills Chart
             st.subheader("Top Skills Overview")
             
             def get_top_skills(skill_series, top_n=5):
                 skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
-                top_skills = skill_counts.head(top_n)
                 if len(skill_counts) > top_n:
-                    top_skills["Others"] = skill_counts[top_n:].sum()  # Group remaining skills as "Others"
+                    top_skills = skill_counts.head(top_n)
+                    top_skills.loc["Others"] = skill_counts[top_n:].sum()  # Group remaining skills as "Others"
+                else:
+                    top_skills = skill_counts
                 return top_skills
             
             # Extracting and grouping skills
             top_current_skills = get_top_skills(df['Skills'])
             top_recommended_skills = get_top_skills(df['Recommended Skills'])
             
-            # Plotting function
-            def plot_pie(data, title):
-                fig, ax = plt.subplots(figsize=(6, 6))
+            # Creating side-by-side columns for proper alignment
+            col1, col2 = st.columns(2)
+            
+            # Plot Pie Chart Function
+            def plot_pie(ax, data, title):
                 data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor': 'white'}, legend=False)
                 ax.set_ylabel('')
                 ax.set_title(title)
-                st.pyplot(fig)
             
-            # Ensure both charts have the same figure size and appearance
-            figsize = (6, 6)
+            # Creating subplots to maintain the same figure size
+            fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+            
+            # Plot both charts with the same size
+            plot_pie(axes[0], top_current_skills, "Current Skills")
+            plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
             
             plot_pie(top_current_skills, "Current Skills")
             plot_pie(top_recommended_skills, "Recommended Skills")
