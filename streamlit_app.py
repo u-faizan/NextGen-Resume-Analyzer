@@ -1,10 +1,14 @@
 import streamlit as st
+from pdf2image import convert_from_path
+import PyPDF2
+from PIL import Image
 import requests
 import json
 import sqlite3
 import pandas as pd
 from pdfminer.high_level import extract_text
 import re
+import os
 
 # ------------------------
 # Helper Functions
