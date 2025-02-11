@@ -191,24 +191,33 @@ if mode == "User":
                     elif not isinstance(course_recommendations, list):
                         course_recommendations = []
                     
-                    # Display the results
+                    # Display the results with descriptions
                     st.header("Basic Info")
+                    st.write("This section displays your personal details extracted from your resume (Name, Email, Mobile, Address).")
                     st.json(basic_info)
                     
                     st.header("AI Resume Summary")
+                    st.write("A concise summary of your experience, skills, and expertise, tailored for ATS optimization.")
                     st.write(result.get("ai_resume_summary", ""))
                     
                     st.header("Resume Score")
+                    st.write("Your resume is scored based on formatting, ATS optimization, content quality, readability, and relevance.")
                     st.metric(label="Score", value=f"{resume_score}/100")
-                    st.markdown("**Note:** The resume score is based on formatting, ATS optimization, content quality, readability, and relevance.")
+                    st.markdown("**Note:** The score is derived from an evaluation of structure, keyword usage, clarity, and overall presentation.")
                     
                     st.header("Skills")
                     st.subheader("Current Skills")
-                    st.write(", ".join(skills.get("current_skills", [])))
+                    st.write("These are the skills currently listed in your resume:")
+                    for skill in skills.get("current_skills", []):
+                        st.markdown(f"- {skill}")
+                    
                     st.subheader("Recommended Skills")
-                    st.write(", ".join(skills.get("recommended_skills", [])))
+                    st.write("These skills are recommended for you to improve your resume:")
+                    for skill in skills.get("recommended_skills", []):
+                        st.markdown(f"- {skill}")
                     
                     st.header("Recommended Courses")
+                    st.write("Courses suggested to help you enhance your skillset and improve your resume:")
                     for course in course_recommendations:
                         if isinstance(course, dict):
                             platform = course.get("platform", "Unknown Platform")
@@ -219,20 +228,31 @@ if mode == "User":
                             st.markdown(f"- {course}")
                     
                     st.header("Appreciation")
+                    st.write("Here are some positive comments acknowledging your strengths in the resume:")
                     for comment in result.get("appreciation", []):
                         st.markdown(f"- {comment}")
                     
                     st.header("Resume Tips")
+                    st.write("Constructive suggestions for improving your resume:")
                     for tip in result.get("resume_tips", []):
                         st.markdown(f"- {tip}")
                     
                     st.header("Matching Job Roles")
-                    st.write(", ".join(result.get("matching_job_roles", [])))
+                    st.write("Job roles that match your skills and experience:")
+                    for role in result.get("matching_job_roles", []):
+                        st.markdown(f"- {role}")
                     
                     st.header("ATS Keywords")
-                    st.json(result.get("ats_keywords", {}))
+                    st.write("Industry-relevant keywords that can improve your resume's performance in Applicant Tracking Systems (ATS).")
+                    ats_keywords = result.get("ats_keywords", [])
+                    if isinstance(ats_keywords, list):
+                        for keyword in ats_keywords:
+                            st.markdown(f"- {keyword}")
+                    else:
+                        st.json(ats_keywords)
                     
                     st.header("Project Suggestions")
+                    st.write("Suggestions to improve your listed projects and new project ideas to further enhance your resume:")
                     project_suggestions = result.get("project_suggestions", {})
                     st.subheader("Improvement Tips for Existing Projects")
                     for tip in project_suggestions.get("improvement_tips", []):
