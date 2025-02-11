@@ -168,16 +168,7 @@ def show_pdf(file_path):
     st.markdown(pdf_display, unsafe_allow_html=True)
 
 
-def extract_image_from_pdf(uploaded_file):
-    """Extract the first page of the PDF and display it as an image."""
-    if uploaded_file is not None:
-        with open("temp_resume.pdf", "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        
-        images = convert_from_path("temp_resume.pdf", first_page=1, last_page=1)
-        if images:
-            return images[0]  # Return the first page as an image
-    return None
+
 
 # ------------------------
 # Streamlit App
@@ -223,11 +214,7 @@ if mode == "User":
         st.subheader("Resume Preview (PDF)")
         show_pdf(file_path)
     
-        # Extract and display the first page image
-        resume_image = extract_image_from_pdf(file_path)  # ✅ Using file path
-        if resume_image:
-            st.subheader("Extracted Resume Image")
-            st.image(resume_image, caption="Click to enlarge", use_column_width=False, width=250)
+
 
         os.remove(file_path)
 
