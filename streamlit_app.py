@@ -362,6 +362,6 @@ elif mode == "Admin":
             plot_pie(axes[0], top_current_skills, "Current Skills")
             plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
             
-            plot_pie(top_current_skills, "Current Skills")
-            plot_pie(top_recommended_skills, "Recommended Skills")
+            # Display the figure in Streamlit
+            st.pyplot(fig)
 
