@@ -168,10 +168,19 @@ st.markdown(
         [data-testid="stSidebar"] * {
             color: white !important; /* Sidebar text color */
         }
+        .stButton > button {
+            background-color: #15967D !important; /* Matching Button Color */
+            color: white !important;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 5px;
+        }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 
 mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
