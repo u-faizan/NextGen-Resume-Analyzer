@@ -120,30 +120,57 @@ Here is the resume text:
             raw_response = response.json()["choices"][0]["message"]["content"]
             data = extract_json(raw_response)
             if not data:
+                st.warning("No valid JSON found in API response. Please try again.")
                 return {"error": "No valid JSON found in API response."}
             return data
         except Exception as e:
             st.error(f"Error during JSON extraction: {e}")
+            st.warning("Something went wrong while processing your request. Try again, it might work now.")
             return {"error": "Invalid JSON response from API."}
     else:
+        st.error(f"API Error {response.status_code}: {response.text}")
+        st.warning("There was an issue with the API response. Try again, it might work this time.")
         return {"error": f"API Error {response.status_code}: {response.text}"}
+
 
 # ------------------------
 # PDF Text Extraction
 # ------------------------
-def extract_text_from_pdf(uploaded_file):
+def extract_image_from_pdf(uploaded_file):
+    """Extract the first page of the PDF and display it as an image."""
     if uploaded_file is not None:
         with open("temp_resume.pdf", "wb") as f:
             f.write(uploaded_file.getbuffer())
-        return extract_text("temp_resume.pdf")
-    else:
-        return ""
+        
+        images = convert_from_path("temp_resume.pdf", first_page=1, last_page=1)
+        if images:
+            return images[0]  # Return the first page as an image
+    return None
 
 # ------------------------
 # Streamlit App
 # ------------------------
 st.set_page_config(page_title="Smart Resume Analyzer", page_icon="📄")
 st.sidebar.title("User Mode")
+st.markdown(
+    """
+    <style>
+        .stSidebar {
+            background-color: #2E4053; /* Dark Blue Sidebar */
+        }
+        .stButton > button {
+            background-color: #1ABC9C !important; /* Teal Color Button */
+            color: white !important;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 20px;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
 mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 
 if mode == "User":
@@ -152,9 +179,10 @@ if mode == "User":
     
     if uploaded_file:
         st.success("File uploaded successfully!")
-        resume_text = extract_text_from_pdf(uploaded_file)
-        st.subheader("Extracted Resume Preview")
-        st.text(resume_text[:500] + "...")
+        resume_image = extract_image_from_pdf(uploaded_file)
+        if resume_image:
+            st.subheader("Resume Preview")
+            st.image(resume_image, caption="Click to enlarge", use_column_width=False, width=250)
         
         if not validate_resume(resume_text):
             st.error("❌ The uploaded document does not appear to be a valid resume. Please upload a proper resume file.")
@@ -281,14 +309,28 @@ elif mode == "Admin":
     admin_user = st.text_input("Username")
     admin_pass = st.text_input("Password", type="password")
     if st.button("Login"):
-        if admin_user ==  st.secrets["user_name"] and admin_pass ==  st.secrets["pass"]:
+        if admin_user == st.secrets["user_name"] and admin_pass == st.secrets["pass"]:
             st.success("Logged in as Admin")
+        
             cursor.execute("SELECT * FROM user_data")
             data = cursor.fetchall()
             df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume Score', 'Skills', 'Recommended Skills', 'Courses', 'Timestamp'])
+        
             st.header("User Data")
             st.dataframe(df)
+        
+            # Resume Score Chart
             st.subheader("Resume Score Distribution")
             st.bar_chart(df['Resume Score'])
-        else:
-            st.error("Invalid Admin Credentials")
+        
+            # Extracting Top Skills for Visualization
+            top_current_skills = pd.Series(", ".join(df['Skills']).split(", ")).value_counts().head(5)
+            top_recommended_skills = pd.Series(", ".join(df['Recommended Skills']).split(", ")).value_counts().head(5)
+        
+            # Pie Charts for Skills
+            st.subheader("Top 5 Current Skills")
+            st.pyplot(top_current_skills.plot.pie(autopct='%1.1f%%', figsize=(5, 5), title="Current Skills").figure)
+        
+            st.subheader("Top 5 Recommended Skills")
+            st.pyplot(top_recommended_skills.plot.pie(autopct='%1.1f%%', figsize=(5, 5), title="Recommended Skills").figure)
+
