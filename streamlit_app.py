@@ -329,14 +329,30 @@ elif mode == "Admin":
             st.subheader("Resume Score Distribution")
             st.bar_chart(df['Resume Score'])
         
-            # Extracting Top Skills for Visualization
-            top_current_skills = pd.Series(", ".join(df['Skills']).split(", ")).value_counts().head(5)
-            top_recommended_skills = pd.Series(", ".join(df['Recommended Skills']).split(", ")).value_counts().head(5)
-        
-            # Pie Charts for Skills
+            def get_top_skills(skill_series, top_n=5):
+                skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
+                if len(skill_counts) > top_n:
+                    top_skills = skill_counts.head(top_n)
+                    top_skills["Others"] = skill_counts[top_n:].sum()  # Group remaining skills as "Others"
+                    return top_skills
+                return skill_counts
+            
+            # Extracting and grouping skills
+            top_current_skills = get_top_skills(df['Skills'])
+            top_recommended_skills = get_top_skills(df['Recommended Skills'])
+            
+            # Plotting function
+            def plot_pie(data, title):
+                fig, ax = plt.subplots(figsize=(6, 6))
+                data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor': 'white'})
+                plt.ylabel('')
+                plt.title(title)
+                st.pyplot(fig)
+            
+            # Display pie charts
             st.subheader("Top 5 Current Skills")
-            st.pyplot(top_current_skills.plot.pie(autopct='%1.1f%%', figsize=(5, 5), title="Current Skills").figure)
-        
+            plot_pie(top_current_skills, "Current Skills")
+            
             st.subheader("Top 5 Recommended Skills")
-            st.pyplot(top_recommended_skills.plot.pie(autopct='%1.1f%%', figsize=(5, 5), title="Recommended Skills").figure)
+            plot_pie(top_recommended_skills, "Recommended Skills")
 
