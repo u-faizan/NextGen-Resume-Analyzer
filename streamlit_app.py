@@ -328,7 +328,9 @@ elif mode == "Admin":
             # Resume Score Chart
             st.subheader("Resume Score Distribution")
             st.bar_chart(df['Resume Score'])
-        
+
+            # Top Skills Chart
+            st.subheader("Top Skills Overview")
             def get_top_skills(skill_series, top_n=5):
                 skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
                 if len(skill_counts) > top_n:
@@ -350,9 +352,6 @@ elif mode == "Admin":
                 st.pyplot(fig)
             
             # Display pie charts
-            st.subheader("Top 5 Current Skills")
             plot_pie(top_current_skills, "Current Skills")
-            
-            st.subheader("Top 5 Recommended Skills")
             plot_pie(top_recommended_skills, "Recommended Skills")
 
