@@ -156,7 +156,7 @@ def extract_text_from_pdf(uploaded_file):
 # ------------------------
 # Streamlit App
 # ------------------------
-st.set_page_config(page_title="Smart Resume Analyzer", page_icon="📄")
+st.set_page_config(page_title="NextGen Resume Analyzer", page_icon="📄")
 st.sidebar.title("User Mode")
 st.markdown(
     """
