@@ -7,6 +7,35 @@ from pdfminer.high_level import extract_text
 import re
 
 # ------------------------
+# Helper Functions
+# ------------------------
+
+def extract_json(response_text):
+    """
+    Extracts JSON from a string using regex.
+    Returns a dictionary if valid JSON is found, else an empty dictionary.
+    """
+    json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+    if json_match:
+        json_text = json_match.group(0)
+        try:
+            return json.loads(json_text)
+        except json.JSONDecodeError:
+            print("Error: The extracted JSON is not valid.")
+            return {}
+    else:
+        print("Error: No valid JSON found in the response.")
+        return {}
+
+def validate_resume(text):
+    """
+    Checks if the extracted text contains common resume keywords.
+    Returns True if valid, else False.
+    """
+    keywords = ["education", "experience", "skills", "projects", "certifications"]
+    return any(keyword in text.lower() for keyword in keywords)
+
+# ------------------------
 # Database Setup
 # ------------------------
 conn = sqlite3.connect('resume_data.db')
@@ -26,64 +55,57 @@ cursor.execute('''
 conn.commit()
 
 # ------------------------
-# API Configuration
+# API Configuration and Resume Analysis
 # ------------------------
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-API_KEY = st.secrets["API_KEY"]  # Securely accessing the API key from secrets
-
-def validate_resume(text):
-    """Checks if the extracted text contains key resume-like elements."""
-    keywords = ["education", "experience", "skills", "projects", "certifications"]
-    return any(keyword in text.lower() for keyword in keywords)
+API_KEY = st.secrets["API_KEY"]  # Securely access the API key
 
 def get_resume_analysis(resume_text):
     prompt = f"""
-    You are an expert resume analyzer. Extract and return the following information **strictly in JSON format**. **Do not include any explanations, comments, or additional text** outside the JSON block.
+You are an expert resume analyzer. Extract and output the following information strictly in JSON format. Do not include any explanations, comments, or additional text outside the JSON block.
 
-    **Evaluation Criteria:**
-    - Content Quality: Clear and well-structured information
-    - ATS Optimization: Proper use of industry-relevant keywords
-    - Resume Structure: Logical flow of sections (Education, Experience, Skills, etc.)
-    - Readability: Concise formatting, bullet points, minimal clutter
+Evaluation Criteria for Resume Score:
+- Formatting and structure (clear sections, bullet points)
+- ATS Optimization (use of industry-relevant keywords)
+- Content Quality (clarity, conciseness, grammar)
+- Relevance (matching skills and experience)
+- Readability and presentation
 
-    **Return the JSON structure as follows:**
+Return the JSON structure as follows:
+{{
+    "basic_info": {{
+        "name": string,
+        "email": string,
+        "mobile": string,
+        "address": string
+    }},
+    "skills": {{
+        "current_skills": list of at least 5 key skills,
+        "recommended_skills": list of at least 5 skills for improvement
+    }},
+    "course_recommendations": list of at least 5 courses with details as:
     {{
-        "basic_info": {{
-            "name": string,
-            "email": string,
-            "mobile": string,
-            "address": string
-        }},
-        "skills": {{
-            "current_skills": list of at least 5 key skills,
-            "recommended_skills": list of at least 5 skills for improvement
-        }},
-        "course_recommendations": list of at least 5 courses with:
-        {{
-            "platform": string,
-            "course_name": string,
-            "link": valid URL
-        }},
-        "appreciation": list of at least 5 personalized positive comments,
-        "resume_tips": list of at least 5 specific suggestions for improvement,
-        "resume_score": string (score in "XX/100" format based on evaluation criteria),
-        "ai_resume_summary": string (concise summary of experience, skills, and expertise for ATS optimization),
-        "matching_job_roles": list of 2-3 job roles that align with the candidate's skills,
-        "ats_keywords": {{
-            "existing_keywords": list of relevant ATS keywords already present,
-            "missing_keywords": list of relevant ATS keywords that should be added
-        }},
-        "project_suggestions": {{
-            "improvement_tips": list of 2-3 tips to enhance existing projects,
-            "new_project_recommendations": list of 2-3 suggested projects to strengthen the resume
-        }}
+        "platform": string,
+        "course_name": string,
+        "link": valid URL
+    }},
+    "appreciation": list of at least 5 personalized positive comments to acknowledge the candidate's strengths,
+    "resume_tips": list of at least 5 specific suggestions for improvement,
+    "resume_score": string (score in "XX/100" format based on the evaluation criteria),
+    "ai_resume_summary": string (a concise summary of the candidate's experience, skills, and expertise for ATS optimization),
+    "matching_job_roles": list of 2-3 job roles that match the candidate's skills,
+    "ats_keywords": list of at least 5 industry-relevant keywords missing from the resume to improve ATS ranking,
+    "project_suggestions": {{
+        "improvement_tips": list of 2-3 tips to enhance existing projects,
+        "new_project_recommendations": list of 2-3 suggested projects
     }}
+}}
 
-    **Return only valid JSON and nothing else.**
-    Here is the resume text:
-    "{resume_text}"
-    """
+Ensure the JSON is valid before outputting.
 
+Here is the resume text:
+"""{resume_text}"""
+"""
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
@@ -95,8 +117,10 @@ def get_resume_analysis(resume_text):
     response = requests.post(API_URL, headers=headers, json=payload)
     if response.status_code == 200:
         try:
-            return json.loads(response.json()["choices"][0]["message"]["content"])
-        except (KeyError, json.JSONDecodeError):
+            raw_response = response.json()["choices"][0]["message"]["content"]
+            return extract_json(raw_response)
+        except Exception as e:
+            print(f"Error during JSON extraction: {e}")
             return {"error": "Invalid JSON response from API."}
     else:
         return {"error": f"API Error {response.status_code}: {response.text}"}
@@ -111,12 +135,11 @@ mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 if mode == "User":
     st.title("📄 Smart Resume Analyzer")
     uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
-    
     if uploaded_file:
         st.success("File uploaded successfully!")
         resume_text = extract_text(uploaded_file)
         if not validate_resume(resume_text):
-            st.error("❌ The uploaded document does not appear to be a resume. Please upload a valid resume.")
+            st.error("❌ The uploaded document does not appear to be a valid resume. Please upload a proper resume file.")
         else:
             st.subheader("Extracted Resume Preview")
             st.text(resume_text[:500] + "...")
@@ -126,35 +149,19 @@ if mode == "User":
                 if "error" in result:
                     st.error(result["error"])
                 else:
-                    st.header("Basic Info")
-                    st.json(result["basic_info"])
+                    st.json(result)
 
-                    st.header("Skills")
-                    st.json(result["skills"])
-
-                    st.header("Recommended Courses")
-                    for course in result["course_recommendations"]:
-                        st.markdown(f"- **{course['platform']}**: [{course['course_name']}]({course['link']})")
-
-                    st.header("Appreciation")
-                    for comment in result["appreciation"]:
-                        st.markdown(f"- {comment}")
-
-                    st.header("Resume Tips")
-                    for tip in result["resume_tips"]:
-                        st.markdown(f"- {tip}")
-
-                    st.header("AI Resume Summary")
-                    st.write(result["ai_resume_summary"])
-
-                    st.header("Matching Job Roles")
-                    st.write(", ".join(result["matching_job_roles"]))
-
-                    st.header("ATS Keywords")
-                    st.json(result["ats_keywords"])
-
-                    st.header("Project Suggestions")
-                    st.json(result["project_suggestions"])
-
-                    st.header("Resume Score")
-                    st.metric(label="Score", value=result["resume_score"])
+elif mode == "Admin":
+    st.title("🔐 Admin Dashboard")
+    admin_user = st.text_input("Username")
+    admin_pass = st.text_input("Password", type="password")
+    if st.button("Login"):
+        if admin_user == "admin" and admin_pass == "admin123":
+            st.success("Logged in as Admin")
+            cursor.execute("SELECT * FROM user_data")
+            data = cursor.fetchall()
+            df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume Score', 'Skills', 'Recommended Skills', 'Courses', 'Timestamp'])
+            st.header("User Data")
+            st.dataframe(df)
+        else:
+            st.error("Invalid Admin Credentials")
