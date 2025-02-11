@@ -6,6 +6,8 @@ import sqlite3
 import pandas as pd
 from pdfminer.high_level import extract_text
 import re
+import os
+import base64
 
 # ------------------------
 # Helper Functions
@@ -137,6 +139,35 @@ Here is the resume text:
 # ------------------------
 # PDF Text Extraction
 # ------------------------
+
+def extract_text_from_pdf(uploaded_file):
+    if uploaded_file is not None:
+        with open("temp_resume.pdf", "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        return extract_text("temp_resume.pdf")
+    else:
+        return ""
+        
+# ------------------------
+# PDF Text Extraction
+# ------------------------
+
+def show_pdf(file_path):
+    """Display a PDF file in Streamlit using an iframe with optimized size."""
+    with open(file_path, "rb") as f:
+        base64_pdf = base64.b64encode(f.read()).decode("utf-8")
+
+    pdf_display = f"""
+    <iframe 
+        src="data:application/pdf;base64,{base64_pdf}" 
+        width="100%" 
+        height="800px" 
+        style="border: none; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0,0,0,0.1);">
+    </iframe>
+    """
+    st.markdown(pdf_display, unsafe_allow_html=True)
+
+
 def extract_image_from_pdf(uploaded_file):
     """Extract the first page of the PDF and display it as an image."""
     if uploaded_file is not None:
@@ -177,13 +208,30 @@ mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 if mode == "User":
     st.title("📄 Smart Resume Analyzer")
     uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
-    
     if uploaded_file:
         st.success("File uploaded successfully!")
-        resume_image = extract_image_from_pdf(uploaded_file)
+    
+        # Extract text from the PDF and store it in a variable
+        resume_text = extract_text_from_pdf(uploaded_file)  # ✅ Storing extracted text
+    
+        # Save uploaded file temporarily
+        file_path = "temp_resume.pdf"
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+    
+        # Show PDF preview
+        st.subheader("Resume Preview (PDF)")
+        show_pdf(file_path)
+    
+        # Extract and display the first page image
+        resume_image = extract_image_from_pdf(file_path)  # ✅ Using file path
         if resume_image:
-            st.subheader("Resume Preview")
+            st.subheader("Extracted Resume Image")
             st.image(resume_image, caption="Click to enlarge", use_column_width=False, width=250)
+
+        os.remove(file_path)
+
+    
         
         if not validate_resume(resume_text):
             st.error("❌ The uploaded document does not appear to be a valid resume. Please upload a proper resume file.")
