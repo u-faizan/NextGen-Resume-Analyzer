@@ -81,7 +81,7 @@ def get_resume_analysis(resume_text):
 
     **Return only valid JSON and nothing else.**
     Here is the resume text:
-    """{resume_text}"""
+    "{resume_text}"
     """
 
     headers = {
