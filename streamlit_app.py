@@ -162,7 +162,7 @@ st.markdown(
     """
     <style>
         .stSidebar {
-            background-color: #2E4053; /* Dark Blue Sidebar */
+            background-color: #1ABC9C !important; /* Teal Color Button */
         }
         .stButton > button {
             background-color: #1ABC9C !important; /* Teal Color Button */
