@@ -104,7 +104,7 @@ Return the JSON structure as follows:
 Ensure the JSON is valid before outputting.
 
 Here is the resume text:
-"""{resume_text}"""
+"{resume_text}"
 """
     headers = {
         "Authorization": f"Bearer {API_KEY}",
