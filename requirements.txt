@@ -1,6 +1,4 @@
 streamlit
-pdf2image
-pypdf2
 pdfminer.six
 openai
 requests
