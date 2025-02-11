@@ -281,7 +281,7 @@ elif mode == "Admin":
     admin_user = st.text_input("Username")
     admin_pass = st.text_input("Password", type="password")
     if st.button("Login"):
-        if admin_user == "admin" and admin_pass == "admin123":
+        if admin_user ==  st.secrets["user_name"] and admin_pass ==  st.secrets["pass"]:
             st.success("Logged in as Admin")
             cursor.execute("SELECT * FROM user_data")
             data = cursor.fetchall()
