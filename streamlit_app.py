@@ -351,12 +351,6 @@ if mode == "User":
                     ))
                     conn.commit()
 
-import json
-import pandas as pd
-import streamlit as st
-import sqlite3
-import matplotlib.pyplot as plt
-
 # Establish connection to SQLite database
 conn = sqlite3.connect("database.db", check_same_thread=False)
 cursor = conn.cursor()
@@ -466,7 +460,4 @@ elif mode == "Admin":
                     st.error("Invalid JSON format. Please upload a valid JSON file.")
             except Exception as e:
                 st.error(f"Error processing JSON file: {e}")
-
-
-
 
