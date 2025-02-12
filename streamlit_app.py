@@ -89,7 +89,7 @@ Return the JSON structure as follows:
         "current_skills": list of at least 5 key skills,
         "recommended_skills": list of at least 5 skills for improvement
     }},
-    "course_recommendations": list of at least 10 courses with details as:
+    "course_recommendations": list of at least 5 courses with details as:
     {{
         "platform": string,
         "course_name": string,
