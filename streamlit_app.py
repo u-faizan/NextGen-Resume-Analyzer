@@ -152,6 +152,8 @@ def extract_text_from_pdf(uploaded_file):
 # ------------------------
 st.set_page_config(page_title="NextGen Resume Analyzer", page_icon="📄")
 st.sidebar.title("User Mode")
+
+# Sidebar styling
 st.markdown(
     """
     <style>
@@ -188,7 +190,7 @@ st.markdown(
 mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 
 if mode == "User":
-    st.title("📄 Smart Resume Analyzer")
+    st.title("📄 NextGen Resume Analyzer")
     uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
     if uploaded_file:
         st.success("File uploaded successfully!")
@@ -208,6 +210,7 @@ if mode == "User":
                     basic_info = result.get("basic_info", {})
                     if basic_info.get("name"):
                         st.markdown(f"<h2>Hello, {basic_info.get('name')}!</h2>", unsafe_allow_html=True)
+                    
                     st.markdown("<h3>Basic Info</h3>", unsafe_allow_html=True)
                     st.markdown(f"""
                     <div style='background-color:#F0F0F0; padding:10px; border-radius:5px;'>
@@ -222,7 +225,7 @@ if mode == "User":
                     st.markdown("<h3>AI Resume Summary</h3>", unsafe_allow_html=True)
                     st.markdown("<p style='font-size:16px; line-height:1.5; color:#333333;'>A concise summary of your experience, skills, and expertise, tailored for ATS optimization.</p>", unsafe_allow_html=True)
                     st.markdown(f"""
-                    <div style='background-color:#F9F9F9; padding:10px; border-left: 4px solid #15967D;'>
+                    <div style='background-color:#F9F9F9; padding:10px; border-left: 4px solid #15967D; border-radius:3px;'>
                         {result.get('ai_resume_summary', '')}
                     </div>
                     """, unsafe_allow_html=True)
@@ -240,17 +243,17 @@ if mode == "User":
                     st.metric(label="Score", value=f"{resume_score}/100")
                     st.markdown("**Note:** The score is derived from an evaluation of structure, keyword usage, clarity, and overall presentation.")
                     
-                    # --- Skills Section ---
+                    # --- Skills Section with Differentiated Design ---
                     st.header("Skills")
-                    st.subheader("Current Skills")
-                    st.write("These are the skills currently listed in your resume:")
-                    for skill in result.get("skills", {}).get("current_skills", []):
-                        st.markdown(f"- {skill}")
-                    
-                    st.subheader("Recommended Skills")
-                    st.write("These skills are recommended for you to improve your resume:")
-                    for skill in result.get("skills", {}).get("recommended_skills", []):
-                        st.markdown(f"- {skill}")
+                    col_skills1, col_skills2 = st.columns(2)
+                    with col_skills1:
+                        st.markdown("<h4 style='color:#15967D;'>Current Skills</h4>", unsafe_allow_html=True)
+                        for skill in result.get("skills", {}).get("current_skills", []):
+                            st.markdown(f"- {skill}")
+                    with col_skills2:
+                        st.markdown("<h4 style='color:#15967D;'>Recommended Skills</h4>", unsafe_allow_html=True)
+                        for skill in result.get("skills", {}).get("recommended_skills", []):
+                            st.markdown(f"- {skill}")
                     
                     # --- Recommended Courses Section with Slider ---
                     st.header("Recommended Courses")
@@ -261,7 +264,7 @@ if mode == "User":
                             platform = course.get("platform", "Unknown Platform")
                             course_name = course.get("course_name", "Unknown Course")
                             link = course.get("link", "#")
-                            st.markdown(f"- **{platform}**: [{course_name}]({link})")
+                            st.markdown(f"- <span style='color:#15967D; font-weight:bold;'>{platform}</span>: [{course_name}]({link})", unsafe_allow_html=True)
                         else:
                             st.markdown(f"- {course}")
                     
@@ -293,16 +296,14 @@ if mode == "User":
                     else:
                         st.json(ats_keywords)
                     
-                    # --- Project Suggestions Section ---
+                    # --- Project Suggestions Section with Expanders and Color Styling ---
                     st.header("Project Suggestions")
-                    st.write("Suggestions to improve your listed projects and new project ideas to further enhance your resume:")
-                    project_suggestions = result.get("project_suggestions", {})
-                    st.subheader("Improvement Tips for Existing Projects")
-                    for tip in project_suggestions.get("improvement_tips", []):
-                        st.markdown(f"- {tip}")
-                    st.subheader("New Project Recommendations")
-                    for proj in project_suggestions.get("new_project_recommendations", []):
-                        st.markdown(f"- {proj}")
+                    with st.expander("Improvement Tips for Existing Projects", expanded=True):
+                        for tip in result.get("project_suggestions", {}).get("improvement_tips", []):
+                            st.markdown(f"- {tip}")
+                    with st.expander("New Project Recommendations", expanded=True):
+                        for proj in result.get("project_suggestions", {}).get("new_project_recommendations", []):
+                            st.markdown(f"- {proj}")
                     
                     # --- Save to Database ---
                     cursor.execute('''
@@ -350,24 +351,20 @@ elif mode == "Admin":
                     top_skills = skill_counts
                 return top_skills
             
-            # Extracting and grouping skills
             top_current_skills = get_top_skills(df['Skills'])
             top_recommended_skills = get_top_skills(df['Recommended Skills'])
             
-            # Creating side-by-side columns for proper alignment
+            # Use side-by-side columns for charts
             col1, col2 = st.columns(2)
-            
-            # Plot Pie Chart Function
-            def plot_pie(ax, data, title):
-                data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor': 'white'}, legend=False)
-                ax.set_ylabel('')
-                ax.set_title(title)
-            
-            # Creating subplots to maintain the same figure size
-            fig, axes = plt.subplots(1, 2, figsize=(16, 8))
-            
-            # Plot both charts with the same size
-            plot_pie(axes[0], top_current_skills, "Current Skills")
-            plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
-            
-            st.pyplot(fig)
+            with col1:
+                fig1, ax1 = plt.subplots(figsize=(6,6))
+                top_current_skills.plot.pie(ax=ax1, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'})
+                ax1.set_ylabel('')
+                ax1.set_title("Current Skills")
+                st.pyplot(fig1)
+            with col2:
+                fig2, ax2 = plt.subplots(figsize=(6,6))
+                top_recommended_skills.plot.pie(ax=ax2, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'})
+                ax2.set_ylabel('')
+                ax2.set_title("Recommended Skills")
+                st.pyplot(fig2)
