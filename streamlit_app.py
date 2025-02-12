@@ -187,7 +187,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
+mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 
 if mode == "User":
     st.title("📄 Smart Resume Analyzer")
