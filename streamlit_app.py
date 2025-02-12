@@ -207,7 +207,7 @@ if mode == "User":
         resume_text = extract_text_from_pdf(uploaded_file)
 #        st.subheader("Extracted Resume Preview")
 #        st.text(resume_text[:500] + "...")
-        st.subheader("Click the Analyze Resume button to proceed")
+        st.markdown("Click the <span style='color: #15967D; font-weight: bold;'>Analyze Resume</span> button to proceed.", unsafe_allow_html=True)
     
         
         if not validate_resume(resume_text):
