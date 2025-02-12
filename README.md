@@ -1,7 +1,20 @@
 # 📦NextGen Resume Analyzer
 
 
-Description of the app ...
+
+
+🚀 **Project Status:** Under Development  
+
+This project is currently in development and actively being improved. The core functionality is implemented, and the app has been deployed, but additional enhancements such as UI improvements, bug fixes, and new features are still in progress.  
+
+🔧 **Upcoming Features:**
+- Enhanced UI for a more website-like experience
+- Improved slider functionality
+- Download/export feature for resume analysis
+- Additional optimizations for performance and usability  
+
+Stay tuned for updates! ⭐ If you find this project useful, consider giving it a star on GitHub.
+
 
 ## Demo App
 
