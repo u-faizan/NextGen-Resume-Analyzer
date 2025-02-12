@@ -152,11 +152,12 @@ def extract_text_from_pdf(uploaded_file):
 # ===========================
 # Main App
 # ===========================
-# Modern Branding Header
+
+# Header with Branding (Project Name: White text on sidebar color background)
 st.markdown("""
-<div style="background-color:#F0F0F0; padding:20px; text-align:center; border-bottom: 2px solid #15967D;">
+<div style="background-color:#15967D; padding:20px; text-align:center; border-bottom: 2px solid #15967D;">
     <img src="https://via.placeholder.com/50" style="vertical-align:middle; margin-right:10px;">
-    <span style="font-size: 2.5em; font-weight: bold; color:#15967D;">NextGen Resume Analyzer</span>
+    <span style="font-size: 2.5em; font-weight: bold; color:white;">NextGen Resume Analyzer</span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -219,9 +220,9 @@ if mode == "User":
                     if basic_info.get("name"):
                         st.markdown(f"<h2 style='color:#15967D;'>Hello, {basic_info.get('name')}!</h2>", unsafe_allow_html=True)
                     
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>Basic Info</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>Basic Info</h3></div>", unsafe_allow_html=True)
                     st.markdown(f"""
-                    <div style='background-color:#F5F5F5; padding:10px; border-radius:5px; margin-bottom:20px;'>
+                    <div style='background-color:#F5F5F5; padding:15px; border-radius:5px; margin-bottom:20px;'>
                         <strong>Name:</strong> {basic_info.get('name', 'N/A')}<br>
                         <strong>Email:</strong> {basic_info.get('email', 'N/A')}<br>
                         <strong>Mobile:</strong> {basic_info.get('mobile', 'N/A')}<br>
@@ -230,16 +231,16 @@ if mode == "User":
                     """, unsafe_allow_html=True)
                     
                     # --- AI Resume Summary Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>AI Resume Summary</h3></div>", unsafe_allow_html=True)
-                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>A concise summary of your experience, skills, and expertise, tailored for ATS optimization.</p>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>AI Resume Summary</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>A concise summary of your experience, skills, and expertise, tailored for ATS optimization. This section provides a quick overview to help hiring managers understand your professional profile.</p>", unsafe_allow_html=True)
                     st.markdown(f"""
-                    <div style='background-color:#F5F5F5; padding:10px; border-left: 4px solid #15967D; border-radius:3px; margin-bottom:20px;'>
+                    <div style='background-color:#F5F5F5; padding:15px; border-left: 4px solid #15967D; border-radius:3px; margin-bottom:20px;'>
                         {result.get('ai_resume_summary', '')}
                     </div>
                     """, unsafe_allow_html=True)
                     
                     # --- Resume Score Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>Resume Score</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>Resume Score</h3></div>", unsafe_allow_html=True)
                     resume_score_raw = result.get("resume_score", "70/100")
                     if isinstance(resume_score_raw, int):
                         resume_score = resume_score_raw
@@ -249,25 +250,25 @@ if mode == "User":
                     else:
                         resume_score = 70
                     st.metric(label="Score", value=f"{resume_score}/100")
-                    st.markdown("<p style='font-size:14px; color:#555555;'><em>Note: The score is derived from structure, keyword usage, clarity, and overall presentation.</em></p>", unsafe_allow_html=True)
+                    st.markdown("<p style='font-size:14px; color:#555555;'><em>Note: The score is derived from the resume's structure, keyword usage, clarity, and overall presentation.</em></p>", unsafe_allow_html=True)
                     
                     # --- Skills Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>Skills</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>Skills</h3></div>", unsafe_allow_html=True)
                     col_skills1, col_skills2 = st.columns(2)
                     with col_skills1:
-                        st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Current Skills</h4>", unsafe_allow_html=True)
-                        for skill in result.get("skills", {}).get("current_skills", []):
-                            st.markdown(f"- {skill}")
-                        st.markdown("</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Current Skills</h4></div>", unsafe_allow_html=True)
+                        with st.container():
+                            for skill in result.get("skills", {}).get("current_skills", []):
+                                st.markdown(f"- {skill}")
                     with col_skills2:
-                        st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Recommended Skills</h4>", unsafe_allow_html=True)
-                        for skill in result.get("skills", {}).get("recommended_skills", []):
-                            st.markdown(f"- {skill}")
-                        st.markdown("</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Recommended Skills</h4></div>", unsafe_allow_html=True)
+                        with st.container():
+                            for skill in result.get("skills", {}).get("recommended_skills", []):
+                                st.markdown(f"- {skill}")
                     
-                    # --- Recommended Courses Section (No Slider) ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>Recommended Courses</h3></div>", unsafe_allow_html=True)
-                    st.markdown("<div style='background-color:#FFFFFF; padding:10px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
+                    # --- Recommended Courses Section ---
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>Recommended Courses</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#FFFFFF; padding:15px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
                     st.write("Courses suggested to help you enhance your skillset:")
                     for course in result.get("course_recommendations", []):
                         if isinstance(course, dict):
@@ -280,33 +281,33 @@ if mode == "User":
                     st.markdown("</div>", unsafe_allow_html=True)
                     
                     # --- Appreciation Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>Appreciation</h3></div>", unsafe_allow_html=True)
-                    st.markdown("<div style='background-color:#F0F0F0; padding:10px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>Appreciation</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#F5F5F5; padding:15px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
                     st.write("Positive comments acknowledging your strengths:")
                     for comment in result.get("appreciation", []):
                         st.markdown(f"- {comment}")
                     st.markdown("</div>", unsafe_allow_html=True)
                     
                     # --- Resume Tips Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>Resume Tips</h3></div>", unsafe_allow_html=True)
-                    st.markdown("<div style='background-color:#F9F9F9; padding:10px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>Resume Tips</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#F5F5F5; padding:15px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
                     st.write("Constructive suggestions for improving your resume:")
                     for tip in result.get("resume_tips", []):
                         st.markdown(f"- {tip}")
                     st.markdown("</div>", unsafe_allow_html=True)
                     
                     # --- Matching Job Roles Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>Matching Job Roles</h3></div>", unsafe_allow_html=True)
-                    st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>Matching Job Roles</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#EFEFEF; padding:15px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
                     st.write("Job roles that match your skills and experience:")
                     for role in result.get("matching_job_roles", []):
                         st.markdown(f"- {role}")
                     st.markdown("</div>", unsafe_allow_html=True)
                     
                     # --- ATS Keywords Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>ATS Keywords</h3></div>", unsafe_allow_html=True)
-                    st.markdown("<div style='background-color:#F9F9F9; padding:10px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
-                    st.write("Industry-relevant keywords for better ATS performance:")
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>ATS Keywords</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#F5F5F5; padding:15px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
+                    st.write("Industry-relevant keywords for better ATS performance: These keywords help your resume get noticed by automated systems and recruiters alike.")
                     ats_keywords = result.get("ats_keywords", [])
                     if isinstance(ats_keywords, list):
                         for keyword in ats_keywords:
@@ -316,8 +317,8 @@ if mode == "User":
                     st.markdown("</div>", unsafe_allow_html=True)
                     
                     # --- Project Suggestions Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>Project Suggestions</h3></div>", unsafe_allow_html=True)
-                    st.markdown("<div style='background-color:#FFFFFF; padding:10px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>Project Suggestions</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#F5F5F5; padding:15px; border-radius:5px; margin-bottom:20px;'>", unsafe_allow_html=True)
                     with st.expander("Improvement Tips for Existing Projects", expanded=True):
                         for tip in result.get("project_suggestions", {}).get("improvement_tips", []):
                             st.markdown(f"- {tip}")
@@ -327,16 +328,16 @@ if mode == "User":
                     st.markdown("</div>", unsafe_allow_html=True)
                     
                     # --- Resume Writing Tips Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>Resume Writing Tips</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>Resume Writing Tips</h3></div>", unsafe_allow_html=True)
                     st.write("Check out these high-rated YouTube videos for expert resume writing tips:")
                     col_video1, col_video2 = st.columns(2)
                     with col_video1:
-                        st.video("https://www.youtube.com/watch?v=4ZKyEJDcCzw")
+                        st.video("https://youtu.be/Tt08KmFfIYQ?si=mU-0_Mcoq8SO_2qt")
                     with col_video2:
-                        st.video("https://www.youtube.com/watch?v=8A5IDyKqxRo")
+                        st.video("https://youtu.be/aD7fP-2u3iY?si=KPnyC0D7HRStOWpB")
                     
                     # --- Export Results Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; margin-bottom:10px; width:300px;'><h3 style='color:white;'>Export Your Details</h3></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'><h3 style='color:white;'>Export Your Details</h3></div>", unsafe_allow_html=True)
                     export_data = {
                         "Basic Info": basic_info,
                         "AI Resume Summary": result.get("ai_resume_summary", ""),
@@ -378,13 +379,13 @@ elif mode == "Admin":
             data = cursor.fetchall()
             df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume Score', 'Skills', 'Recommended Skills', 'Courses', 'Timestamp'])
             
-            st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; width:300px;'><h3 style='color:white;'>User Data</h3></div>", unsafe_allow_html=True)
+            st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block;'><h3 style='color:white;'>User Data</h3></div>", unsafe_allow_html=True)
             st.dataframe(df)
             
-            st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; width:300px;'><h3 style='color:white;'>Resume Score Distribution</h3></div>", unsafe_allow_html=True)
+            st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block;'><h3 style='color:white;'>Resume Score Distribution</h3></div>", unsafe_allow_html=True)
             st.bar_chart(df['Resume Score'])
             
-            st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; width:300px;'><h3 style='color:white;'>Top Skills Overview</h3></div>", unsafe_allow_html=True)
+            st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block;'><h3 style='color:white;'>Top Skills Overview</h3></div>", unsafe_allow_html=True)
             def get_top_skills(skill_series, top_n=5):
                 skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
                 if len(skill_counts) > top_n:
@@ -411,7 +412,7 @@ elif mode == "Admin":
                 ax2.set_title("Recommended Skills")
                 st.pyplot(fig2)
             
-            st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; width:300px;'><h3 style='color:white;'>Export Data</h3></div>", unsafe_allow_html=True)
+            st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block;'><h3 style='color:white;'>Export Data</h3></div>", unsafe_allow_html=True)
             export_json = df.to_json(orient="records", indent=4)
             st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
             
