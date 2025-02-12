@@ -351,38 +351,49 @@ if mode == "User":
                     ))
                     conn.commit()
 
+import json
+import pandas as pd
+import streamlit as st
+import sqlite3
+import matplotlib.pyplot as plt
+
+# Establish connection to SQLite database
+conn = sqlite3.connect("database.db", check_same_thread=False)
+cursor = conn.cursor()
+
 elif mode == "Admin":
     st.title("🔐 Admin Dashboard")
 
-    # Store login state using session_state
+    # Store login state
     if "admin_logged_in" not in st.session_state:
         st.session_state.admin_logged_in = False
 
-    # If not logged in, show login fields
     if not st.session_state.admin_logged_in:
         admin_user = st.text_input("Username")
         admin_pass = st.text_input("Password", type="password")
         if st.button("Login"):
             if admin_user == st.secrets["user_name"] and admin_pass == st.secrets["pass"]:
-                st.session_state.admin_logged_in = True  # Store login state
+                st.session_state.admin_logged_in = True
                 st.success("Logged in as Admin")
+                st.rerun()
             else:
                 st.error("Invalid Admin Credentials")
-    
-    # If logged in, show admin dashboard
+
     if st.session_state.admin_logged_in:
         cursor.execute("SELECT * FROM user_data")
         data = cursor.fetchall()
-        df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume Score', 'Skills', 'Recommended Skills', 'Courses', 'Timestamp'])
+        df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp'])
 
         st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
         st.dataframe(df)
 
+        # Resume Score Bar Chart
         st.markdown("<h3 style='color:#15967D;'>Resume Score Distribution</h3>", unsafe_allow_html=True)
-        st.bar_chart(df['Resume Score'])
+        st.bar_chart(df['Resume_Score'])
 
+        # Top Skills Charts
         st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
-        
+
         def get_top_skills(skill_series, top_n=5):
             skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
             if len(skill_counts) > top_n:
@@ -391,13 +402,12 @@ elif mode == "Admin":
             else:
                 top_skills = skill_counts
             return top_skills
-        
-        top_current_skills = get_top_skills(df['Skills'])
-        top_recommended_skills = get_top_skills(df['Recommended Skills'])
 
-        # Create pie charts with larger size and reduced gap
+        top_current_skills = get_top_skills(df['Skills'])
+        top_recommended_skills = get_top_skills(df['Recommended_Skills'])
+
         fig, axes = plt.subplots(1, 2, figsize=(20, 12))
-        plt.subplots_adjust(wspace=0.5)  # Reduce horizontal gap
+        plt.subplots_adjust(wspace=0.3)  # Reduce gap between charts
 
         def plot_pie(ax, data, title):
             data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
@@ -408,10 +418,10 @@ elif mode == "Admin":
         plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
         st.pyplot(fig)
 
-        # Export & Update Data Section
+        # **Manage Data Section**
         st.markdown("<h3 style='color:#15967D;'>Manage Data</h3>", unsafe_allow_html=True)
         col_export, col_clear = st.columns(2)
-        
+
         with col_export:
             export_json = df.to_json(orient="records", indent=4)
             st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
@@ -421,25 +431,27 @@ elif mode == "Admin":
                 cursor.execute("DELETE FROM user_data")
                 conn.commit()
                 st.success("All results have been cleared from the database.")
+                st.rerun()  # **Forces an immediate refresh**
 
-        # **NEW FEATURE**: Update Database with Uploaded JSON File
+        # **NEW FEATURE: Update Database from JSON**
         st.markdown("<h3 style='color:#15967D;'>Update Database</h3>", unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Upload JSON File", type=["json"])
 
         if uploaded_file is not None:
             try:
                 new_data = json.load(uploaded_file)
-                if isinstance(new_data, list):  # Ensure it's a list of records
+
+                if isinstance(new_data, list):
                     for record in new_data:
                         cursor.execute("""
-                            INSERT INTO user_data (ID, Name, Email, Resume Score, Skills, Recommended Skills, Courses, Timestamp)
+                            INSERT INTO user_data (ID, Name, Email, Resume_Score, Skills, Recommended_Skills, Courses, Timestamp)
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                             ON CONFLICT(ID) DO UPDATE SET
                                 Name=excluded.Name,
                                 Email=excluded.Email,
-                                "Resume Score"=excluded."Resume Score",
+                                Resume_Score=excluded.Resume_Score,
                                 Skills=excluded.Skills,
-                                "Recommended Skills"=excluded."Recommended Skills",
+                                Recommended_Skills=excluded.Recommended_Skills,
                                 Courses=excluded.Courses,
                                 Timestamp=excluded.Timestamp;
                         """, (
@@ -449,10 +461,12 @@ elif mode == "Admin":
 
                     conn.commit()
                     st.success("Database successfully updated!")
+                    st.rerun()  # **Force refresh**
                 else:
                     st.error("Invalid JSON format. Please upload a valid JSON file.")
             except Exception as e:
                 st.error(f"Error processing JSON file: {e}")
+
 
 
 
