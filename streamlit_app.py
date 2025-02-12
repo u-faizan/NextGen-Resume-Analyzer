@@ -172,24 +172,20 @@ st.markdown(
             color: white !important; /* Sidebar text color */
         }
         /* Fix select box text color */
-        div[data-baseweb="select"] > div {
+        div[data-baseweb="select"] {
             color: black !important;
         }
-        .stButton > button {
-            background-color: #15967D !important; /* Matching Button Color */
-            color: white !important;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 8px 20px;
-            border-radius: 5px;
+        div[data-baseweb="select"] * {
+            color: black !important;
+        }
+        /* Ensure selected value inside box is black */
+        div[data-baseweb="select"] > div {
+            color: black !important;
         }
     </style>
     """,
     unsafe_allow_html=True
 )
-
-# Sidebar select box with default "User" mode
-mode = st.sidebar.selectbox("Select Mode", ["Admin", "User"], index=1)
 
 
 
