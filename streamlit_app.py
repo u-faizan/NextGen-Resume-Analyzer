@@ -262,7 +262,7 @@ if mode == "User":
                     st.metric(label="Score", value=f"{resume_score}/100")
                     st.markdown("<p style='font-size:14px; color:#555555;'><em>Note: The score is derived from structure, keyword usage, clarity, and overall presentation.</em></p>", unsafe_allow_html=True)
                     
-                    # --- Skills Section with Side-by-Side Layout ---
+                    # --- Skills Section (Side-by-Side) ---
                     st.markdown("""
                     <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
                         <h3 style="color:white; margin:0;">Skills</h3>
@@ -284,6 +284,7 @@ if mode == "User":
                         <h3 style="color:white; margin:0;">Recommended Courses</h3>
                     </div>
                     """, unsafe_allow_html=True)
+                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Courses suggested to help you enhance your skillset. These courses are recommended to improve your skills and keep you updated with industry trends.</p>", unsafe_allow_html=True)
                     st.write("Courses suggested to help you enhance your skillset:")
                     for course in result.get("course_recommendations", []):
                         if isinstance(course, dict):
@@ -330,7 +331,7 @@ if mode == "User":
                         <h3 style="color:white; margin:0;">ATS Keywords</h3>
                     </div>
                     """, unsafe_allow_html=True)
-                    st.write("Industry-relevant keywords for better ATS performance. These keywords help your resume get noticed by automated systems and recruiters alike.")
+                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Industry-relevant keywords for better ATS performance. These keywords help your resume get noticed by automated systems and recruiters alike.</p>", unsafe_allow_html=True)
                     ats_keywords = result.get("ats_keywords", [])
                     if isinstance(ats_keywords, list):
                         for keyword in ats_keywords:
@@ -344,10 +345,10 @@ if mode == "User":
                         <h3 style="color:white; margin:0;">Project Suggestions</h3>
                     </div>
                     """, unsafe_allow_html=True)
-                    with st.expander("Improvement Tips for Existing Projects", expanded=True):
+                    with st.expander("<div style='background-color:#EFEFEF; padding:5px; border-radius:5px; color:#15967D; font-weight:bold;'>Improvement Tips for Existing Projects</div>", expanded=True):
                         for tip in result.get("project_suggestions", {}).get("improvement_tips", []):
                             st.markdown(f"- {tip}")
-                    with st.expander("New Project Recommendations", expanded=True):
+                    with st.expander("<div style='background-color:#EFEFEF; padding:5px; border-radius:5px; color:#15967D; font-weight:bold;'>New Project Recommendations</div>", expanded=True):
                         for proj in result.get("project_suggestions", {}).get("new_project_recommendations", []):
                             st.markdown(f"- {proj}")
                     
@@ -363,6 +364,23 @@ if mode == "User":
                         st.video("https://youtu.be/Tt08KmFfIYQ?si=mU-0_Mcoq8SO_2qt")
                     with col_video2:
                         st.video("https://youtu.be/aD7fP-2u3iY?si=KPnyC0D7HRStOWpB")
+                    
+                    # --- Export Results Section ---
+                    st.markdown("<h3 style='color:#15967D;'>Export Your Details</h3>", unsafe_allow_html=True)
+                    export_data = {
+                        "Basic Info": basic_info,
+                        "AI Resume Summary": result.get("ai_resume_summary", ""),
+                        "Resume Score": resume_score,
+                        "Skills": result.get("skills", {}),
+                        "Recommended Courses": result.get("course_recommendations", []),
+                        "Appreciation": result.get("appreciation", []),
+                        "Resume Tips": result.get("resume_tips", []),
+                        "Matching Job Roles": result.get("matching_job_roles", []),
+                        "ATS Keywords": result.get("ats_keywords", []),
+                        "Project Suggestions": result.get("project_suggestions", {})
+                    }
+                    export_json = json.dumps(export_data, indent=4)
+                    st.download_button("Download Details as JSON", data=export_json, file_name="resume_analysis.json", mime="application/json")
 
 
                     
