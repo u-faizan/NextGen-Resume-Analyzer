@@ -262,18 +262,21 @@ if mode == "User":
                     st.metric(label="Score", value=f"{resume_score}/100")
                     st.markdown("<p style='font-size:14px; color:#555555;'><em>Note: The score is derived from structure, keyword usage, clarity, and overall presentation.</em></p>", unsafe_allow_html=True)
                     
-                    # --- Skills Section ---
+                    # --- Skills Section with Side-by-Side Layout ---
                     st.markdown("""
                     <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
                         <h3 style="color:white; margin:0;">Skills</h3>
                     </div>
                     """, unsafe_allow_html=True)
-                    st.markdown("<h4 style='color:#15967D;'>Current Skills</h4>", unsafe_allow_html=True)
-                    for skill in result.get("skills", {}).get("current_skills", []):
-                        st.markdown(f"- {skill}")
-                    st.markdown("<h4 style='color:#15967D;'>Recommended Skills</h4>", unsafe_allow_html=True)
-                    for skill in result.get("skills", {}).get("recommended_skills", []):
-                        st.markdown(f"- {skill}")
+                    col_skills1, col_skills2 = st.columns(2)
+                    with col_skills1:
+                        st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Current Skills</h4></div>", unsafe_allow_html=True)
+                        for skill in result.get("skills", {}).get("current_skills", []):
+                            st.markdown(f"- {skill}")
+                    with col_skills2:
+                        st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Recommended Skills</h4></div>", unsafe_allow_html=True)
+                        for skill in result.get("skills", {}).get("recommended_skills", []):
+                            st.markdown(f"- {skill}")
                     
                     # --- Recommended Courses Section ---
                     st.markdown("""
@@ -360,6 +363,7 @@ if mode == "User":
                         st.video("https://youtu.be/Tt08KmFfIYQ?si=mU-0_Mcoq8SO_2qt")
                     with col_video2:
                         st.video("https://youtu.be/aD7fP-2u3iY?si=KPnyC0D7HRStOWpB")
+
 
                     
                     # --- Export Results Section ---
