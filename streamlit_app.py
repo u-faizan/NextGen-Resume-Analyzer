@@ -207,7 +207,7 @@ if mode == "User":
         resume_text = extract_text_from_pdf(uploaded_file)
         st.subheader("Extracted Resume Preview")
 #        st.text(resume_text[:500] + "...")
-        st.subheader('''<h4 style='text-align: left; color: #15967D;'>Adding this skills to resume will boost🚀 the chances of getting a Job💼</h4>''',
+        st.markdown('''<h4 style='text-align: left; color: #15967D;'>Adding this skills to resume will boost🚀 the chances of getting a Job💼</h4>''',
                             unsafe_allow_html=True)
     
         
