@@ -189,7 +189,7 @@ st.markdown(
 
 
 
-mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
+mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"],index=1)
 
 if mode == "User":
     st.title("📄 Smart Resume Analyzer")
