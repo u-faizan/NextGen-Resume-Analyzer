@@ -353,58 +353,106 @@ if mode == "User":
 
 elif mode == "Admin":
     st.title("🔐 Admin Dashboard")
-    admin_user = st.text_input("Username")
-    admin_pass = st.text_input("Password", type="password")
-    if st.button("Login"):
-        if admin_user == st.secrets["user_name"] and admin_pass == st.secrets["pass"]:
-            st.success("Logged in as Admin")
-            cursor.execute("SELECT * FROM user_data")
-            data = cursor.fetchall()
-            df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume Score', 'Skills', 'Recommended Skills', 'Courses', 'Timestamp'])
-            
-            st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
-            st.dataframe(df)
-            
-            st.markdown("<h3 style='color:#15967D;'>Resume Score Distribution</h3>", unsafe_allow_html=True)
-            st.bar_chart(df['Resume Score'])
-            
-            st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
-            def get_top_skills(skill_series, top_n=5):
-                skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
-                if len(skill_counts) > top_n:
-                    top_skills = skill_counts.head(top_n)
-                    top_skills.loc["Others"] = skill_counts[top_n:].sum()
-                else:
-                    top_skills = skill_counts
-                return top_skills
-            
-            top_current_skills = get_top_skills(df['Skills'])
-            top_recommended_skills = get_top_skills(df['Recommended Skills'])
-            
-            # Creating a common figure with increased size and reduced gap
-            fig, axes = plt.subplots(1, 2, figsize=(20, 12))
-            plt.subplots_adjust(wspace=0.5)  # Reduced horizontal gap
-            def plot_pie(ax, data, title):
-                data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
-                ax.set_ylabel('')
-                ax.set_title(title)
-            
-            plot_pie(axes[0], top_current_skills, "Current Skills")
-            plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
-            st.pyplot(fig)
-            
-            # Export Data Heading and Buttons (side by side)
-            st.markdown("<h3 style='color:#15967D;'>Export Data</h3>", unsafe_allow_html=True)
-            col_export, col_clear = st.columns(2)
-            with col_export:
-                export_json = df.to_json(orient="records", indent=4)
-                st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
-            with col_clear:
-                if st.button("Clear Results", key="clear_admin"):
-                    cursor.execute("DELETE FROM user_data")
+
+    # Store login state using session_state
+    if "admin_logged_in" not in st.session_state:
+        st.session_state.admin_logged_in = False
+
+    # If not logged in, show login fields
+    if not st.session_state.admin_logged_in:
+        admin_user = st.text_input("Username")
+        admin_pass = st.text_input("Password", type="password")
+        if st.button("Login"):
+            if admin_user == st.secrets["user_name"] and admin_pass == st.secrets["pass"]:
+                st.session_state.admin_logged_in = True  # Store login state
+                st.success("Logged in as Admin")
+            else:
+                st.error("Invalid Admin Credentials")
+    
+    # If logged in, show admin dashboard
+    if st.session_state.admin_logged_in:
+        cursor.execute("SELECT * FROM user_data")
+        data = cursor.fetchall()
+        df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume Score', 'Skills', 'Recommended Skills', 'Courses', 'Timestamp'])
+
+        st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
+        st.dataframe(df)
+
+        st.markdown("<h3 style='color:#15967D;'>Resume Score Distribution</h3>", unsafe_allow_html=True)
+        st.bar_chart(df['Resume Score'])
+
+        st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
+        
+        def get_top_skills(skill_series, top_n=5):
+            skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
+            if len(skill_counts) > top_n:
+                top_skills = skill_counts.head(top_n)
+                top_skills.loc["Others"] = skill_counts[top_n:].sum()
+            else:
+                top_skills = skill_counts
+            return top_skills
+        
+        top_current_skills = get_top_skills(df['Skills'])
+        top_recommended_skills = get_top_skills(df['Recommended Skills'])
+
+        # Create pie charts with larger size and reduced gap
+        fig, axes = plt.subplots(1, 2, figsize=(20, 12))
+        plt.subplots_adjust(wspace=0.5)  # Reduce horizontal gap
+
+        def plot_pie(ax, data, title):
+            data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
+            ax.set_ylabel('')
+            ax.set_title(title)
+
+        plot_pie(axes[0], top_current_skills, "Current Skills")
+        plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
+        st.pyplot(fig)
+
+        # Export & Update Data Section
+        st.markdown("<h3 style='color:#15967D;'>Manage Data</h3>", unsafe_allow_html=True)
+        col_export, col_clear = st.columns(2)
+        
+        with col_export:
+            export_json = df.to_json(orient="records", indent=4)
+            st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
+
+        with col_clear:
+            if st.button("Clear Results", key="clear_admin"):
+                cursor.execute("DELETE FROM user_data")
+                conn.commit()
+                st.success("All results have been cleared from the database.")
+
+        # **NEW FEATURE**: Update Database with Uploaded JSON File
+        st.markdown("<h3 style='color:#15967D;'>Update Database</h3>", unsafe_allow_html=True)
+        uploaded_file = st.file_uploader("Upload JSON File", type=["json"])
+
+        if uploaded_file is not None:
+            try:
+                new_data = json.load(uploaded_file)
+                if isinstance(new_data, list):  # Ensure it's a list of records
+                    for record in new_data:
+                        cursor.execute("""
+                            INSERT INTO user_data (ID, Name, Email, Resume Score, Skills, Recommended Skills, Courses, Timestamp)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                            ON CONFLICT(ID) DO UPDATE SET
+                                Name=excluded.Name,
+                                Email=excluded.Email,
+                                "Resume Score"=excluded."Resume Score",
+                                Skills=excluded.Skills,
+                                "Recommended Skills"=excluded."Recommended Skills",
+                                Courses=excluded.Courses,
+                                Timestamp=excluded.Timestamp;
+                        """, (
+                            record['ID'], record['Name'], record['Email'], record['Resume Score'],
+                            record['Skills'], record['Recommended Skills'], record['Courses'], record['Timestamp']
+                        ))
+
                     conn.commit()
-                    st.success("All results have been cleared from the database.")
-        else:
-            st.error("Invalid Admin Credentials")
+                    st.success("Database successfully updated!")
+                else:
+                    st.error("Invalid JSON format. Please upload a valid JSON file.")
+            except Exception as e:
+                st.error(f"Error processing JSON file: {e}")
+
 
 
