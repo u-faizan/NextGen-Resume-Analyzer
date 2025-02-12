@@ -168,6 +168,11 @@ st.markdown(
         [data-testid="stSidebar"] * {
             color: white !important; /* Sidebar text color */
         }
+        /* Ensure select box text inside the sidebar remains black */
+        [data-testid="stSidebar"] select, 
+        [data-testid="stSidebar"] option {
+            color: black !important;
+        }
         .stButton > button {
             background-color: #15967D !important; /* Matching Button Color */
             color: white !important;
@@ -180,6 +185,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
 
