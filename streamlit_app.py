@@ -207,7 +207,7 @@ if mode == "User":
         resume_text = extract_text_from_pdf(uploaded_file)
 #        st.subheader("Extracted Resume Preview")
 #        st.text(resume_text[:500] + "...")
-        st.subheader("Click the 'Analyze Resume' button to proceed")
+        st.subheader("Click the Analyze Resume button to proceed")
     
         
         if not validate_resume(resume_text):
