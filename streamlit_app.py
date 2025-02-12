@@ -158,6 +158,7 @@ def extract_text_from_pdf(uploaded_file):
 # ------------------------
 st.set_page_config(page_title="NextGen Resume Analyzer", page_icon="📄")
 st.sidebar.title("User Mode")
+# Sidebar styling
 st.markdown(
     """
     <style>
@@ -168,9 +169,10 @@ st.markdown(
         [data-testid="stSidebar"] * {
             color: white !important; /* Sidebar text color */
         }
-        /* Ensure select box text inside the sidebar remains black */
+        /* Select box text should be black */
         [data-testid="stSidebar"] select, 
-        [data-testid="stSidebar"] option {
+        [data-testid="stSidebar"] option, 
+        [data-testid="stSidebar"] select option:checked {
             color: black !important;
         }
         .stButton > button {
@@ -186,10 +188,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Sidebar select box with default "User" mode
+mode = st.sidebar.selectbox("Select Mode", ["Admin", "User"], index=1)
 
-
-
-mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"],index=1)
 
 if mode == "User":
     st.title("📄 Smart Resume Analyzer")
