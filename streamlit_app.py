@@ -160,6 +160,7 @@ st.set_page_config(page_title="NextGen Resume Analyzer", page_icon="📄")
 st.sidebar.title("User Mode")
 # Sidebar styling
 # Sidebar styling
+# Sidebar styling
 st.markdown(
     """
     <style>
@@ -170,12 +171,8 @@ st.markdown(
         [data-testid="stSidebar"] * {
             color: white !important; /* Sidebar text color */
         }
-        /* Make select box text black */
-        [data-testid="stSidebar"] select {
-            color: black !important;
-            background-color: white !important;
-        }
-        [data-testid="stSidebar"] select option {
+        /* Fix select box text color */
+        div[data-baseweb="select"] > div {
             color: black !important;
         }
         .stButton > button {
