@@ -382,7 +382,7 @@ elif mode == "Admin":
             top_recommended_skills = get_top_skills(df['Recommended Skills'])
             
             # Creating subplots with increased size and gap
-            fig, axes = plt.subplots(1, 2, figsize=(18, 10))
+            fig, axes = plt.subplots(1, 2, figsize=(22, 12))
             plt.subplots_adjust(wspace=1.0)  # Increase horizontal gap
             def plot_pie(ax, data, title):
                 data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
