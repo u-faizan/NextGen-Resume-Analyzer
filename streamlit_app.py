@@ -351,14 +351,11 @@ if mode == "User":
                     ))
                     conn.commit()
 
-# Establish connection to SQLite database
-conn = sqlite3.connect("database.db", check_same_thread=False)
-cursor = conn.cursor()
-
-elif mode == "Admin":
+# --- Admin Panel Code ---
+if mode == "Admin":
     st.title("🔐 Admin Dashboard")
-
-    # Store login state
+    
+    # Store login state in session_state
     if "admin_logged_in" not in st.session_state:
         st.session_state.admin_logged_in = False
 
@@ -374,20 +371,18 @@ elif mode == "Admin":
                 st.error("Invalid Admin Credentials")
 
     if st.session_state.admin_logged_in:
+        # Fetch data from database
         cursor.execute("SELECT * FROM user_data")
         data = cursor.fetchall()
         df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp'])
-
+        
         st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
         st.dataframe(df)
-
-        # Resume Score Bar Chart
+        
         st.markdown("<h3 style='color:#15967D;'>Resume Score Distribution</h3>", unsafe_allow_html=True)
         st.bar_chart(df['Resume_Score'])
-
-        # Top Skills Charts
+        
         st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
-
         def get_top_skills(skill_series, top_n=5):
             skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
             if len(skill_counts) > top_n:
@@ -400,62 +395,54 @@ elif mode == "Admin":
         top_current_skills = get_top_skills(df['Skills'])
         top_recommended_skills = get_top_skills(df['Recommended_Skills'])
 
+        # Create common figure with increased size and reduced gap
         fig, axes = plt.subplots(1, 2, figsize=(20, 12))
-        plt.subplots_adjust(wspace=0.3)  # Reduce gap between charts
-
+        plt.subplots_adjust(wspace=0.3)
         def plot_pie(ax, data, title):
             data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
             ax.set_ylabel('')
             ax.set_title(title)
-
         plot_pie(axes[0], top_current_skills, "Current Skills")
         plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
         st.pyplot(fig)
-
-        # **Manage Data Section**
+        
+        # Manage Data Section: Export and Clear Buttons
         st.markdown("<h3 style='color:#15967D;'>Manage Data</h3>", unsafe_allow_html=True)
-        col_export, col_clear = st.columns(2)
-
-        with col_export:
+        col1, col_gap, col2 = st.columns([1, 0.5, 1])
+        with col1:
             export_json = df.to_json(orient="records", indent=4)
             st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
-
-        with col_clear:
+        with col2:
             if st.button("Clear Results", key="clear_admin"):
                 cursor.execute("DELETE FROM user_data")
                 conn.commit()
                 st.success("All results have been cleared from the database.")
-                st.rerun()  # **Forces an immediate refresh**
+                st.rerun()  # Forces an immediate refresh
 
-        # **NEW FEATURE: Update Database from JSON**
+        # Update Database Feature: Upload JSON file to update data
         st.markdown("<h3 style='color:#15967D;'>Update Database</h3>", unsafe_allow_html=True)
-        uploaded_file = st.file_uploader("Upload JSON File", type=["json"])
-
+        uploaded_file = st.file_uploader("Upload JSON File to Update Database", type=["json"], key="update_json")
         if uploaded_file is not None:
             try:
                 new_data = json.load(uploaded_file)
-
                 if isinstance(new_data, list):
                     for record in new_data:
+                        # Map JSON keys (with spaces) to DB columns (without spaces)
+                        rec_id = record.get("ID")
+                        name = record.get("Name")
+                        email = record.get("Email")
+                        resume_score = record.get("Resume Score")
+                        skills = record.get("Skills")
+                        rec_skills = record.get("Recommended Skills")
+                        courses = record.get("Courses")
+                        timestamp = record.get("Timestamp")
                         cursor.execute("""
-                            INSERT INTO user_data (ID, Name, Email, Resume_Score, Skills, Recommended_Skills, Courses, Timestamp)
+                            INSERT OR REPLACE INTO user_data (id, name, email, resume_score, skills, recommended_skills, courses, timestamp)
                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                            ON CONFLICT(ID) DO UPDATE SET
-                                Name=excluded.Name,
-                                Email=excluded.Email,
-                                Resume_Score=excluded.Resume_Score,
-                                Skills=excluded.Skills,
-                                Recommended_Skills=excluded.Recommended_Skills,
-                                Courses=excluded.Courses,
-                                Timestamp=excluded.Timestamp;
-                        """, (
-                            record['ID'], record['Name'], record['Email'], record['Resume Score'],
-                            record['Skills'], record['Recommended Skills'], record['Courses'], record['Timestamp']
-                        ))
-
+                        """, (rec_id, name, email, resume_score, skills, rec_skills, courses, timestamp))
                     conn.commit()
                     st.success("Database successfully updated!")
-                    st.rerun()  # **Force refresh**
+                    st.rerun()  # Force refresh to show updated data
                 else:
                     st.error("Invalid JSON format. Please upload a valid JSON file.")
             except Exception as e:
