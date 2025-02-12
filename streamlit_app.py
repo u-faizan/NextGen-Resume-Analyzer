@@ -381,28 +381,27 @@ elif mode == "Admin":
             top_current_skills = get_top_skills(df['Skills'])
             top_recommended_skills = get_top_skills(df['Recommended Skills'])
             
-            col1, col2 = st.columns(2)
-            with col1:
-                fig1, ax1 = plt.subplots(figsize=(6,6))
-                top_current_skills.plot.pie(ax=ax1, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'})
-                ax1.set_ylabel('')
-                ax1.set_title("Current Skills")
-                st.pyplot(fig1)
-            with col2:
-                fig2, ax2 = plt.subplots(figsize=(6,6))
-                top_recommended_skills.plot.pie(ax=ax2, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'})
-                ax2.set_ylabel('')
-                ax2.set_title("Recommended Skills")
-                st.pyplot(fig2)
+            # Creating subplots to maintain the same figure size
+            fig, axes = plt.subplots(1, 2, figsize=(16, 8))
             
-            st.markdown("<h3 style='color:#15967D;'>Export Data</h3>", unsafe_allow_html=True)
-            export_json = df.to_json(orient="records", indent=4)
-            st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
+            def plot_pie(ax, data, title):
+                data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
+                ax.set_ylabel('')
+                ax.set_title(title)
             
-            if st.button("Clear Results"):
-                cursor.execute("DELETE FROM user_data")
-                conn.commit()
-                st.success("All results have been cleared from the database.")
+            plot_pie(axes[0], top_current_skills, "Current Skills")
+            plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
+            st.pyplot(fig)
+            
+            col_left, col_right = st.columns(2)
+            with col_left:
+                export_json = df.to_json(orient="records", indent=4)
+                st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
+            with col_right:
+                if st.button("Clear Results"):
+                    cursor.execute("DELETE FROM user_data")
+                    conn.commit()
+                    st.success("All results have been cleared from the database.")
         
         else:
             st.error("Invalid Admin Credentials")
