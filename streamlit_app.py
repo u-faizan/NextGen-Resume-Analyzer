@@ -11,74 +11,6 @@ import os
 import base64
 
 # ===========================
-# Custom CSS for Modern Look
-# ===========================
-def load_css(theme="light"):
-    if theme == "dark":
-        css = """
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-            body { font-family: 'Roboto', sans-serif; }
-            .header { padding: 20px; text-align: center; background-color: #333333; color: white; }
-            .card { background-color: #222222; padding: 20px; margin: 10px 0; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); color: white; }
-            h1, h2, h3, h4 { color: #FFFFFF; }
-            p { color: #CCCCCC; }
-        </style>
-        """
-    else:  # light theme
-        css = """
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-            body { font-family: 'Roboto', sans-serif; }
-            .header { padding: 20px; text-align: center; background-color: #F0F0F0; color: #15967D; }
-            .card { background-color: #FFFFFF; padding: 20px; margin: 10px 0; border-radius: 10px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1); }
-            h1, h2, h3, h4 { color: #15967D; }
-            p { color: #333333; }
-        </style>
-        """
-    st.markdown(css, unsafe_allow_html=True)
-
-# ===========================
-# Sidebar Styling & Theme Toggle
-# ===========================
-# Theme toggle in sidebar
-theme_choice = st.sidebar.radio("Theme", options=["Light", "Dark"], index=0)
-load_css(theme="dark" if theme_choice=="Dark" else "light")
-
-# Sidebar Navigation
-nav_option = st.sidebar.radio("Navigation", options=["User Mode", "Admin Mode", "Download Results"], index=0)
-
-# Additional sidebar styling for consistent look
-st.markdown(
-    """
-    <style>
-        [data-testid="stSidebar"] {
-            background-color: #15967D !important;
-        }
-        [data-testid="stSidebar"] * {
-            color: white !important;
-        }
-        /* For select boxes in sidebar, force black text */
-        div[data-baseweb="select"] {
-            color: black !important;
-        }
-        div[data-baseweb="select"] * {
-            color: black !important;
-        }
-        .stButton > button {
-            background-color: #15967D !important;
-            color: white !important;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 8px 20px;
-            border-radius: 5px;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# ===========================
 # Helper Functions
 # ===========================
 def extract_json(response_text):
@@ -129,7 +61,7 @@ cursor.execute('''
 conn.commit()
 
 # ===========================
-# API Configuration & Resume Analysis
+# API Configuration and Resume Analysis
 # ===========================
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 API_KEY = st.secrets["API_KEY"]
@@ -163,12 +95,12 @@ Return the JSON structure as follows:
         "course_name": string,
         "link": valid URL
     }},
-    "appreciation": list of at least 5 personalized positive comments to acknowledge the candidate's strengths,
-    "resume_tips": list of at least 5 specific suggestions for improvement,
-    "resume_score": string (score in "XX/100" format based on the evaluation criteria),
-    "ai_resume_summary": string (a concise summary of the candidate's experience, skills, and expertise for ATS optimization),
-    "matching_job_roles": list of 2-3 job roles that match the candidate's skills,
-    "ats_keywords": list of at least 5 industry-relevant keywords missing from the resume to improve ATS ranking,
+    "appreciation": list of at least 5 personalized positive comments,
+    "resume_tips": list of at least 5 suggestions for improvement,
+    "resume_score": string (score in "XX/100" format),
+    "ai_resume_summary": string (a concise summary for ATS optimization),
+    "matching_job_roles": list of 2-3 job roles,
+    "ats_keywords": list of at least 5 industry-relevant keywords,
     "project_suggestions": {{
         "improvement_tips": list of 2-3 tips to enhance existing projects,
         "new_project_recommendations": list of 2-3 suggested projects
@@ -199,7 +131,7 @@ Here is the resume text:
             return data
         except Exception as e:
             st.error(f"Error during JSON extraction: {e}")
-            st.warning("Something went wrong while processing your request. Try again, it might work now.")
+            st.warning("Something went wrong. Try again, it might work now.")
             return {"error": "Invalid JSON response from API."}
     else:
         st.error(f"API Error {response.status_code}: {response.text}")
@@ -220,15 +152,52 @@ def extract_text_from_pdf(uploaded_file):
 # ===========================
 # Main App
 # ===========================
-# Header with Branding
+# Modern Branding Header
 st.markdown("""
-<div class="header">
+<div style="background-color:#F0F0F0; padding:20px; text-align:center; border-bottom: 2px solid #15967D;">
     <img src="https://via.placeholder.com/50" style="vertical-align:middle; margin-right:10px;">
-    <span style="font-size: 2.5em; font-weight: bold;">NextGen Resume Analyzer</span>
+    <span style="font-size: 2.5em; font-weight: bold; color:#15967D;">NextGen Resume Analyzer</span>
 </div>
 """, unsafe_allow_html=True)
 
-if nav_option == "User Mode":
+# Sidebar (User Mode remains unchanged)
+st.sidebar.title("User Mode")
+st.markdown(
+    """
+    <style>
+        [data-testid="stSidebar"] {
+            background-color: #15967D !important;
+            color: white !important;
+        }
+        [data-testid="stSidebar"] * {
+            color: white !important;
+        }
+        div[data-baseweb="select"] {
+            color: black !important;
+        }
+        div[data-baseweb="select"] * {
+            color: black !important;
+        }
+        div[data-baseweb="select"] > div {
+            color: black !important;
+        }
+        .stButton > button {
+            background-color: #15967D !important;
+            color: white !important;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 5px;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Navigation: Only "User Mode" and "Admin Mode"
+mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
+
+if mode == "User":
     st.title("User Dashboard")
     uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
     if uploaded_file:
@@ -245,31 +214,28 @@ if nav_option == "User Mode":
                 if "error" in result:
                     st.error(result["error"])
                 else:
-                    # Greeting & Basic Info Section with Card Design
+                    # --- Greeting & Basic Info (Card Design) ---
                     basic_info = result.get("basic_info", {})
                     if basic_info.get("name"):
-                        st.markdown(f"<h2>Hello, {basic_info.get('name')}!</h2>", unsafe_allow_html=True)
-                    st.markdown("<h3>Basic Info</h3>", unsafe_allow_html=True)
+                        st.markdown(f"<h2 style='color:#15967D;'>Hello, {basic_info.get('name')}!</h2>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#F0F0F0; padding:10px; border-radius:5px;'><h3 style='color:#15967D;'>Basic Info</h3>", unsafe_allow_html=True)
                     st.markdown(f"""
-                    <div class="card">
                         <strong>Name:</strong> {basic_info.get('name', 'N/A')}<br>
                         <strong>Email:</strong> {basic_info.get('email', 'N/A')}<br>
                         <strong>Mobile:</strong> {basic_info.get('mobile', 'N/A')}<br>
                         <strong>Address:</strong> {basic_info.get('address', 'N/A')}
-                    </div>
                     """, unsafe_allow_html=True)
+                    st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # AI Resume Summary Section
-                    st.markdown("<h3>AI Resume Summary</h3>", unsafe_allow_html=True)
+                    # --- AI Resume Summary (Card Design) ---
+                    st.markdown("<div style='background-color:#F9F9F9; padding:10px; border-left: 4px solid #15967D; border-radius:3px; margin-top:10px;'>", unsafe_allow_html=True)
+                    st.markdown("<h3 style='color:#15967D;'>AI Resume Summary</h3>", unsafe_allow_html=True)
                     st.markdown("<p style='font-size:16px; line-height:1.5; color:#333333;'>A concise summary of your experience, skills, and expertise, tailored for ATS optimization.</p>", unsafe_allow_html=True)
-                    st.markdown(f"""
-                    <div class="card" style="border-left: 4px solid #15967D;">
-                        {result.get('ai_resume_summary', '')}
-                    </div>
-                    """, unsafe_allow_html=True)
+                    st.markdown(f"{result.get('ai_resume_summary', '')}", unsafe_allow_html=True)
+                    st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Resume Score Section
-                    st.markdown("<h3>Resume Score</h3>", unsafe_allow_html=True)
+                    # --- Resume Score ---
+                    st.markdown("<h3 style='color:#15967D;'>Resume Score</h3>", unsafe_allow_html=True)
                     resume_score_raw = result.get("resume_score", "70/100")
                     if isinstance(resume_score_raw, int):
                         resume_score = resume_score_raw
@@ -279,26 +245,27 @@ if nav_option == "User Mode":
                     else:
                         resume_score = 70
                     st.metric(label="Score", value=f"{resume_score}/100")
-                    st.markdown("<p><em>Note:</em> The score is derived from structure, keyword usage, clarity, and overall presentation.</p>", unsafe_allow_html=True)
+                    st.markdown("<p style='font-size:14px; color:#555555;'><em>Note: The score is derived from structure, keyword usage, clarity, and overall presentation.</em></p>", unsafe_allow_html=True)
                     
-                    # Skills Section arranged in Cards using columns
-                    st.markdown("<h3>Skills</h3>", unsafe_allow_html=True)
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.markdown("<h4 style='color:#15967D;'>Current Skills</h4>", unsafe_allow_html=True)
-                        with st.container():
-                            for skill in result.get("skills", {}).get("current_skills", []):
-                                st.markdown(f"- {skill}")
-                    with col2:
-                        st.markdown("<h4 style='color:#15967D;'>Recommended Skills</h4>", unsafe_allow_html=True)
-                        with st.container():
-                            for skill in result.get("skills", {}).get("recommended_skills", []):
-                                st.markdown(f"- {skill}")
+                    # --- Skills Section ---
+                    st.markdown("<h3 style='color:#15967D;'>Skills</h3>", unsafe_allow_html=True)
+                    col_skills1, col_skills2 = st.columns(2)
+                    with col_skills1:
+                        st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Current Skills</h4>", unsafe_allow_html=True)
+                        for skill in result.get("skills", {}).get("current_skills", []):
+                            st.markdown(f"- {skill}")
+                        st.markdown("</div>", unsafe_allow_html=True)
+                    with col_skills2:
+                        st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Recommended Skills</h4>", unsafe_allow_html=True)
+                        for skill in result.get("skills", {}).get("recommended_skills", []):
+                            st.markdown(f"- {skill}")
+                        st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Recommended Courses Section with Slider
-                    st.markdown("<h3>Recommended Courses</h3>", unsafe_allow_html=True)
+                    # --- Recommended Courses with Slider ---
+                    st.markdown("<h3 style='color:#15967D;'>Recommended Courses</h3>", unsafe_allow_html=True)
                     num_courses = st.slider("Select number of course recommendations to display:", min_value=1, max_value=10, value=5, key="courses_slider")
-                    st.markdown("Courses suggested to help you enhance your skillset:")
+                    st.markdown("<div style='background-color:#FFFFFF; padding:10px; border-radius:5px;'>", unsafe_allow_html=True)
+                    st.write("Courses suggested to help you enhance your skillset:")
                     for course in result.get("course_recommendations", [])[:num_courses]:
                         if isinstance(course, dict):
                             platform = course.get("platform", "Unknown Platform")
@@ -307,46 +274,66 @@ if nav_option == "User Mode":
                             st.markdown(f"- <span style='color:#15967D; font-weight:bold;'>{platform}</span>: [{course_name}]({link})", unsafe_allow_html=True)
                         else:
                             st.markdown(f"- {course}")
+                    st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Appreciation Section
-                    st.markdown("<h3>Appreciation</h3>", unsafe_allow_html=True)
-                    st.markdown("Positive comments acknowledging your strengths:")
+                    # --- Appreciation ---
+                    st.markdown("<h3 style='color:#15967D;'>Appreciation</h3>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#F0F0F0; padding:10px; border-radius:5px;'>", unsafe_allow_html=True)
+                    st.write("Positive comments acknowledging your strengths:")
                     for comment in result.get("appreciation", []):
                         st.markdown(f"- {comment}")
+                    st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Resume Tips Section
-                    st.markdown("<h3>Resume Tips</h3>", unsafe_allow_html=True)
-                    st.markdown("Constructive suggestions for improving your resume:")
+                    # --- Resume Tips ---
+                    st.markdown("<h3 style='color:#15967D;'>Resume Tips</h3>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#F9F9F9; padding:10px; border-radius:5px;'>", unsafe_allow_html=True)
+                    st.write("Constructive suggestions for improving your resume:")
                     for tip in result.get("resume_tips", []):
                         st.markdown(f"- {tip}")
+                    st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Matching Job Roles Section
-                    st.markdown("<h3>Matching Job Roles</h3>", unsafe_allow_html=True)
-                    st.markdown("Job roles that align with your skills and experience:")
+                    # --- Matching Job Roles ---
+                    st.markdown("<h3 style='color:#15967D;'>Matching Job Roles</h3>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'>", unsafe_allow_html=True)
+                    st.write("Job roles that match your skills and experience:")
                     for role in result.get("matching_job_roles", []):
                         st.markdown(f"- {role}")
+                    st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # ATS Keywords Section
-                    st.markdown("<h3>ATS Keywords</h3>", unsafe_allow_html=True)
-                    st.markdown("Industry-relevant keywords for better ATS performance:")
+                    # --- ATS Keywords ---
+                    st.markdown("<h3 style='color:#15967D;'>ATS Keywords</h3>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#F9F9F9; padding:10px; border-radius:5px;'>", unsafe_allow_html=True)
+                    st.write("Industry-relevant keywords for better ATS performance:")
                     ats_keywords = result.get("ats_keywords", [])
                     if isinstance(ats_keywords, list):
                         for keyword in ats_keywords:
                             st.markdown(f"- {keyword}")
                     else:
                         st.json(ats_keywords)
+                    st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # Project Suggestions Section with Expanders and Colored Subheadings
-                    st.markdown("<h3>Project Suggestions</h3>", unsafe_allow_html=True)
-                    with st.expander("<span style='color:#15967D;'>Improvement Tips for Existing Projects</span>", expanded=True):
+                    # --- Project Suggestions ---
+                    st.markdown("<h3 style='color:#15967D;'>Project Suggestions</h3>", unsafe_allow_html=True)
+                    st.markdown("<div style='background-color:#FFFFFF; padding:10px; border-radius:5px;'>", unsafe_allow_html=True)
+                    with st.expander("Improvement Tips for Existing Projects", expanded=True):
                         for tip in result.get("project_suggestions", {}).get("improvement_tips", []):
                             st.markdown(f"- {tip}")
-                    with st.expander("<span style='color:#15967D;'>New Project Recommendations</span>", expanded=True):
+                    with st.expander("New Project Recommendations", expanded=True):
                         for proj in result.get("project_suggestions", {}).get("new_project_recommendations", []):
                             st.markdown(f"- {proj}")
+                    st.markdown("</div>", unsafe_allow_html=True)
                     
-                    # --- Download/Export Section ---
-                    st.markdown("<h3>Export Your Details</h3>", unsafe_allow_html=True)
+                    # --- Resume Writing Tips (New Section) ---
+                    st.markdown("<h3 style='color:#15967D;'>Resume Writing Tips</h3>", unsafe_allow_html=True)
+                    st.write("Check out these high-rated YouTube videos for expert resume writing tips:")
+                    col_video1, col_video2 = st.columns(2)
+                    with col_video1:
+                        st.video("https://www.youtube.com/watch?v=4ZKyEJDcCzw")  # Replace with actual high-rated video link
+                    with col_video2:
+                        st.video("https://www.youtube.com/watch?v=8A5IDyKqxRo")  # Replace with actual high-rated video link
+                    
+                    # --- Export Results Section ---
+                    st.markdown("<h3 style='color:#15967D;'>Export Your Details</h3>", unsafe_allow_html=True)
                     export_data = {
                         "Basic Info": basic_info,
                         "AI Resume Summary": result.get("ai_resume_summary", ""),
@@ -361,7 +348,7 @@ if nav_option == "User Mode":
                     }
                     export_json = json.dumps(export_data, indent=4)
                     st.download_button("Download Details as JSON", data=export_json, file_name="resume_analysis.json", mime="application/json")
-
+                    
                     # --- Save to Database ---
                     cursor.execute('''
                         INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, timestamp)
@@ -377,7 +364,7 @@ if nav_option == "User Mode":
                     ))
                     conn.commit()
 
-elif nav_option == "Admin Mode":
+elif mode == "Admin":
     st.title("🔐 Admin Dashboard")
     admin_user = st.text_input("Username")
     admin_pass = st.text_input("Password", type="password")
@@ -387,12 +374,14 @@ elif nav_option == "Admin Mode":
             cursor.execute("SELECT * FROM user_data")
             data = cursor.fetchall()
             df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume Score', 'Skills', 'Recommended Skills', 'Courses', 'Timestamp'])
-            st.markdown("<h3>User Data</h3>", unsafe_allow_html=True)
+            
+            st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
             st.dataframe(df)
-            st.markdown("<h3>Resume Score Distribution</h3>", unsafe_allow_html=True)
+            
+            st.markdown("<h3 style='color:#15967D;'>Resume Score Distribution</h3>", unsafe_allow_html=True)
             st.bar_chart(df['Resume Score'])
             
-            st.markdown("<h3>Top Skills Overview</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
             def get_top_skills(skill_series, top_n=5):
                 skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
                 if len(skill_counts) > top_n:
@@ -418,14 +407,16 @@ elif nav_option == "Admin Mode":
                 ax2.set_ylabel('')
                 ax2.set_title("Recommended Skills")
                 st.pyplot(fig2)
+            
+            # --- Download and Clear Results in Admin ---
+            st.markdown("<h3 style='color:#15967D;'>Export Data</h3>", unsafe_allow_html=True)
+            export_json = df.to_json(orient="records", indent=4)
+            st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
+            
+            if st.button("Clear Results"):
+                cursor.execute("DELETE FROM user_data")
+                conn.commit()
+                st.success("All results have been cleared from the database.")
         
         else:
             st.error("Invalid Admin Credentials")
-    
-elif nav_option == "Download Results":
-    st.title("Export Data")
-    cursor.execute("SELECT * FROM user_data")
-    data = cursor.fetchall()
-    df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume Score', 'Skills', 'Recommended Skills', 'Courses', 'Timestamp'])
-    export_json = df.to_json(orient="records", indent=4)
-    st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
