@@ -213,15 +213,18 @@ if mode == "User":
                 if "error" in result:
                     st.error(result["error"])
                 else:
-                    # --- Greeting & Basic Info Section (Card Design) ---
+                    # --- Greeting & Basic Info Section ---
                     basic_info = result.get("basic_info", {})
                     if basic_info.get("name"):
                         st.markdown(f"<h2 style='color:#15967D;'>Hello, {basic_info.get('name')}!</h2>", unsafe_allow_html=True)
                     
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'>"
-                                "<h3 style='color:white;'>Basic Info</h3></div>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">Basic Info</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
                     st.markdown(f"""
-                    <div style='background-color:#F5F5F5; padding:15px; border-radius:5px; margin-bottom:20px;'>
+                    <div style="background-color:#F5F5F5; padding:15px; border-radius:5px; margin-bottom:20px;">
                         <strong>Name:</strong> {basic_info.get('name', 'N/A')}<br>
                         <strong>Email:</strong> {basic_info.get('email', 'N/A')}<br>
                         <strong>Mobile:</strong> {basic_info.get('mobile', 'N/A')}<br>
@@ -230,17 +233,24 @@ if mode == "User":
                     """, unsafe_allow_html=True)
                     
                     # --- AI Resume Summary Section ---
-                    st.markdown("<div style='background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;'>"
-                                "<h3 style='color:white;'>AI Resume Summary</h3></div>", unsafe_allow_html=True)
-                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>A concise summary of your experience, skills, and expertise, tailored for ATS optimization. This summary gives hiring managers a quick overview of your professional profile.</p>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">AI Resume Summary</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>A concise summary of your experience, skills, and expertise, tailored for ATS optimization. This summary provides a quick overview for hiring managers.</p>", unsafe_allow_html=True)
                     st.markdown(f"""
-                    <div style='background-color:#F5F5F5; padding:15px; border-left: 4px solid #15967D; border-radius:3px; margin-bottom:20px;'>
+                    <div style="background-color:#F5F5F5; padding:15px; border-left: 4px solid #15967D; border-radius:3px; margin-bottom:20px;">
                         {result.get('ai_resume_summary', '')}
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    # --- Resume Score Section (Simple) ---
-                    st.markdown("<h3 style='color:#15967D;'>Resume Score</h3>", unsafe_allow_html=True)
+                    # --- Resume Score Section ---
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">Resume Score</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
                     resume_score_raw = result.get("resume_score", "70/100")
                     if isinstance(resume_score_raw, int):
                         resume_score = resume_score_raw
@@ -252,8 +262,12 @@ if mode == "User":
                     st.metric(label="Score", value=f"{resume_score}/100")
                     st.markdown("<p style='font-size:14px; color:#555555;'><em>Note: The score is derived from structure, keyword usage, clarity, and overall presentation.</em></p>", unsafe_allow_html=True)
                     
-                    # --- Skills Section (Plain Headings) ---
-                    st.markdown("<h3 style='color:#15967D;'>Skills</h3>", unsafe_allow_html=True)
+                    # --- Skills Section ---
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">Skills</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
                     st.markdown("<h4 style='color:#15967D;'>Current Skills</h4>", unsafe_allow_html=True)
                     for skill in result.get("skills", {}).get("current_skills", []):
                         st.markdown(f"- {skill}")
@@ -261,8 +275,12 @@ if mode == "User":
                     for skill in result.get("skills", {}).get("recommended_skills", []):
                         st.markdown(f"- {skill}")
                     
-                    # --- Recommended Courses Section (Plain Container) ---
-                    st.markdown("<h3 style='color:#15967D;'>Recommended Courses</h3>", unsafe_allow_html=True)
+                    # --- Recommended Courses Section ---
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">Recommended Courses</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
                     st.write("Courses suggested to help you enhance your skillset:")
                     for course in result.get("course_recommendations", []):
                         if isinstance(course, dict):
@@ -274,25 +292,41 @@ if mode == "User":
                             st.markdown(f"- {course}")
                     
                     # --- Appreciation Section ---
-                    st.markdown("<h3 style='color:#15967D;'>Appreciation</h3>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">Appreciation</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
                     st.write("Positive comments acknowledging your strengths:")
                     for comment in result.get("appreciation", []):
                         st.markdown(f"- {comment}")
                     
                     # --- Resume Tips Section ---
-                    st.markdown("<h3 style='color:#15967D;'>Resume Tips</h3>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">Resume Tips</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
                     st.write("Constructive suggestions for improving your resume:")
                     for tip in result.get("resume_tips", []):
                         st.markdown(f"- {tip}")
                     
                     # --- Matching Job Roles Section ---
-                    st.markdown("<h3 style='color:#15967D;'>Matching Job Roles</h3>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">Matching Job Roles</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
                     st.write("Job roles that match your skills and experience:")
                     for role in result.get("matching_job_roles", []):
                         st.markdown(f"- {role}")
                     
                     # --- ATS Keywords Section ---
-                    st.markdown("<h3 style='color:#15967D;'>ATS Keywords</h3>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">ATS Keywords</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
                     st.write("Industry-relevant keywords for better ATS performance. These keywords help your resume get noticed by automated systems and recruiters alike.")
                     ats_keywords = result.get("ats_keywords", [])
                     if isinstance(ats_keywords, list):
@@ -302,7 +336,11 @@ if mode == "User":
                         st.json(ats_keywords)
                     
                     # --- Project Suggestions Section ---
-                    st.markdown("<h3 style='color:#15967D;'>Project Suggestions</h3>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">Project Suggestions</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
                     with st.expander("Improvement Tips for Existing Projects", expanded=True):
                         for tip in result.get("project_suggestions", {}).get("improvement_tips", []):
                             st.markdown(f"- {tip}")
@@ -311,13 +349,18 @@ if mode == "User":
                             st.markdown(f"- {proj}")
                     
                     # --- Resume Writing Tips Section ---
-                    st.markdown("<h3 style='color:#15967D;'>Resume Writing Tips</h3>", unsafe_allow_html=True)
+                    st.markdown("""
+                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                        <h3 style="color:white; margin:0;">Resume Writing Tips</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
                     st.write("Check out these high-rated YouTube videos for expert resume writing tips:")
                     col_video1, col_video2 = st.columns(2)
                     with col_video1:
                         st.video("https://youtu.be/Tt08KmFfIYQ?si=mU-0_Mcoq8SO_2qt")
                     with col_video2:
                         st.video("https://youtu.be/aD7fP-2u3iY?si=KPnyC0D7HRStOWpB")
+
                     
                     # --- Export Results Section ---
                     st.markdown("<h3 style='color:#15967D;'>Export Your Details</h3>", unsafe_allow_html=True)
