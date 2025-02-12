@@ -381,9 +381,9 @@ elif mode == "Admin":
             top_current_skills = get_top_skills(df['Skills'])
             top_recommended_skills = get_top_skills(df['Recommended Skills'])
             
-            # Create a common figure with increased gap between pie charts
-            fig, axes = plt.subplots(1, 2, figsize=(16, 8))
-            plt.subplots_adjust(wspace=0.8)  # Increase horizontal gap
+            # Creating subplots with increased size and gap
+            fig, axes = plt.subplots(1, 2, figsize=(18, 10))
+            plt.subplots_adjust(wspace=1.0)  # Increase horizontal gap
             def plot_pie(ax, data, title):
                 data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
                 ax.set_ylabel('')
@@ -393,16 +393,17 @@ elif mode == "Admin":
             plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
             st.pyplot(fig)
             
-            # Export & Clear Buttons in Admin (placed side by side with a gap)
-            col_left, col_gap, col_right = st.columns([1, 0.5, 1])
-            with col_left:
+            # Export Data Heading and Buttons with More Gap
+            st.markdown("<h3 style='color:#15967D;'>Export Data</h3>", unsafe_allow_html=True)
+            col1, col_gap, col2 = st.columns([1, 0.5, 1])
+            with col1:
                 export_json = df.to_json(orient="records", indent=4)
                 st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
-            with col_right:
+            with col2:
                 if st.button("Clear Results"):
                     cursor.execute("DELETE FROM user_data")
                     conn.commit()
                     st.success("All results have been cleared from the database.")
-        
         else:
             st.error("Invalid Admin Credentials")
+
