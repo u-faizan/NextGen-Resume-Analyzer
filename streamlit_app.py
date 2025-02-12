@@ -155,7 +155,7 @@ def extract_text_from_pdf(uploaded_file):
 # Header with Branding: Project Name in a border matching sidebar style
 st.markdown("""
 <div style="background-color:#15967D; padding:20px; text-align:center; border-bottom: 3px solid #15967D;">
-    <img src="https://via.placeholder.com/50" style="vertical-align:middle; margin-right:10px;">
+    <img src="images.png" style="vertical-align:middle; margin-right:10px;">
     <span style="font-size: 2.5em; font-weight: bold; color:white;">NextGen Resume Analyzer</span>
 </div>
 """, unsafe_allow_html=True)
