@@ -205,10 +205,7 @@ if mode == "User":
     if uploaded_file:
         st.success("File uploaded successfully!")
         resume_text = extract_text_from_pdf(uploaded_file)
-#        st.subheader("Extracted Resume Preview")
-#        st.text(resume_text[:500] + "...")
         st.markdown("Click the <span style='color: #15967D; font-weight: bold;'>Analyze Resume</span> button to proceed.", unsafe_allow_html=True)
-    
         
         if not validate_resume(resume_text):
             st.error("❌ The uploaded document does not appear to be a valid resume. Please upload a proper resume file.")
@@ -219,13 +216,31 @@ if mode == "User":
                 if "error" in result:
                     st.error(result["error"])
                 else:
-
-                    
-                    # Extract values from the result
+                    # --- Greeting & Basic Info Section ---
                     basic_info = result.get("basic_info", {})
-                    skills = result.get("skills", {})
+                    if basic_info.get("name"):
+                        st.markdown(f"<h2>Hello, {basic_info.get('name')}!</h2>", unsafe_allow_html=True)
+                    st.markdown("<h3>Basic Info</h3>", unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div style='background-color:#F0F0F0; padding:10px; border-radius:5px;'>
+                        <strong>Name:</strong> {basic_info.get('name', 'N/A')}<br>
+                        <strong>Email:</strong> {basic_info.get('email', 'N/A')}<br>
+                        <strong>Mobile:</strong> {basic_info.get('mobile', 'N/A')}<br>
+                        <strong>Address:</strong> {basic_info.get('address', 'N/A')}
+                    </div>
+                    """, unsafe_allow_html=True)
                     
-                    # --- Resume Score Extraction ---
+                    # --- AI Resume Summary Section ---
+                    st.markdown("<h3>AI Resume Summary</h3>", unsafe_allow_html=True)
+                    st.markdown("<p style='font-size:16px; line-height:1.5; color:#333333;'>A concise summary of your experience, skills, and expertise, tailored for ATS optimization.</p>", unsafe_allow_html=True)
+                    st.markdown(f"""
+                    <div style='background-color:#F9F9F9; padding:10px; border-left: 4px solid #15967D;'>
+                        {result.get('ai_resume_summary', '')}
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # --- Resume Score Section ---
+                    st.header("Resume Score")
                     resume_score_raw = result.get("resume_score", "70/100")
                     if isinstance(resume_score_raw, int):
                         resume_score = resume_score_raw
@@ -234,47 +249,26 @@ if mode == "User":
                         resume_score = int(resume_score_match.group()) if resume_score_match else 70
                     else:
                         resume_score = 70
-                    
-                    # --- Course Recommendations Handling ---
-                    course_recommendations = result.get("course_recommendations", [])
-                    if isinstance(course_recommendations, str):
-                        try:
-                            course_recommendations = json.loads(course_recommendations)
-                            if not isinstance(course_recommendations, list):
-                                course_recommendations = [course_recommendations]
-                        except json.JSONDecodeError:
-                            course_recommendations = [course_recommendations]
-                    elif not isinstance(course_recommendations, list):
-                        course_recommendations = []
-                    
-                    # Display the results with descriptions
-                    st.header("Basic Info")
-                    st.write("This section displays your personal details extracted from your resume (Name, Email, Mobile, Address).")
-                    st.json(basic_info)
-                    
-                    st.header("AI Resume Summary")
-                    st.write("A concise summary of your experience, skills, and expertise, tailored for ATS optimization.")
-                    st.write(result.get("ai_resume_summary", ""))
-                    
-                    st.header("Resume Score")
-                    st.write("Your resume is scored based on formatting, ATS optimization, content quality, readability, and relevance.")
                     st.metric(label="Score", value=f"{resume_score}/100")
                     st.markdown("**Note:** The score is derived from an evaluation of structure, keyword usage, clarity, and overall presentation.")
                     
+                    # --- Skills Section ---
                     st.header("Skills")
                     st.subheader("Current Skills")
                     st.write("These are the skills currently listed in your resume:")
-                    for skill in skills.get("current_skills", []):
+                    for skill in result.get("skills", {}).get("current_skills", []):
                         st.markdown(f"- {skill}")
                     
                     st.subheader("Recommended Skills")
                     st.write("These skills are recommended for you to improve your resume:")
-                    for skill in skills.get("recommended_skills", []):
+                    for skill in result.get("skills", {}).get("recommended_skills", []):
                         st.markdown(f"- {skill}")
                     
+                    # --- Recommended Courses Section with Slider ---
                     st.header("Recommended Courses")
+                    num_courses = st.slider("Select number of course recommendations to display:", min_value=1, max_value=10, value=5)
                     st.write("Courses suggested to help you enhance your skillset and improve your resume:")
-                    for course in course_recommendations:
+                    for course in result.get("course_recommendations", [])[:num_courses]:
                         if isinstance(course, dict):
                             platform = course.get("platform", "Unknown Platform")
                             course_name = course.get("course_name", "Unknown Course")
@@ -283,23 +277,27 @@ if mode == "User":
                         else:
                             st.markdown(f"- {course}")
                     
+                    # --- Appreciation Section ---
                     st.header("Appreciation")
                     st.write("Here are some positive comments acknowledging your strengths in the resume:")
                     for comment in result.get("appreciation", []):
                         st.markdown(f"- {comment}")
                     
+                    # --- Resume Tips Section ---
                     st.header("Resume Tips")
                     st.write("Constructive suggestions for improving your resume:")
                     for tip in result.get("resume_tips", []):
                         st.markdown(f"- {tip}")
                     
+                    # --- Matching Job Roles Section ---
                     st.header("Matching Job Roles")
                     st.write("Job roles that match your skills and experience:")
                     for role in result.get("matching_job_roles", []):
                         st.markdown(f"- {role}")
                     
+                    # --- ATS Keywords Section ---
                     st.header("ATS Keywords")
-                    st.write("Industry-relevant keywords that can improve your resume's performance in Applicant Tracking Systems (ATS).")
+                    st.write("Industry-relevant keywords that can improve your resume's performance in Applicant Tracking Systems (ATS):")
                     ats_keywords = result.get("ats_keywords", [])
                     if isinstance(ats_keywords, list):
                         for keyword in ats_keywords:
@@ -307,6 +305,7 @@ if mode == "User":
                     else:
                         st.json(ats_keywords)
                     
+                    # --- Project Suggestions Section ---
                     st.header("Project Suggestions")
                     st.write("Suggestions to improve your listed projects and new project ideas to further enhance your resume:")
                     project_suggestions = result.get("project_suggestions", {})
@@ -317,7 +316,7 @@ if mode == "User":
                     for proj in project_suggestions.get("new_project_recommendations", []):
                         st.markdown(f"- {proj}")
                     
-                    # Save to database
+                    # --- Save to Database ---
                     cursor.execute('''
                         INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, timestamp)
                         VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
@@ -325,10 +324,10 @@ if mode == "User":
                         basic_info.get("name", "N/A"),
                         basic_info.get("email", "N/A"),
                         resume_score,
-                        ", ".join(skills.get("current_skills", [])),
-                        ", ".join(skills.get("recommended_skills", [])),
+                        ", ".join(result.get("skills", {}).get("current_skills", [])),
+                        ", ".join(result.get("skills", {}).get("recommended_skills", [])),
                         ", ".join([course.get("course_name", "") if isinstance(course, dict) else str(course)
-                                   for course in course_recommendations])
+                                   for course in result.get("course_recommendations", [])])
                     ))
                     conn.commit()
 
