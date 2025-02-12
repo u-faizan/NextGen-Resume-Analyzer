@@ -381,9 +381,9 @@ elif mode == "Admin":
             top_current_skills = get_top_skills(df['Skills'])
             top_recommended_skills = get_top_skills(df['Recommended Skills'])
             
-            # Creating subplots to maintain the same figure size
+            # Create a common figure with increased gap between pie charts
             fig, axes = plt.subplots(1, 2, figsize=(16, 8))
-            
+            plt.subplots_adjust(wspace=0.8)  # Increase horizontal gap
             def plot_pie(ax, data, title):
                 data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
                 ax.set_ylabel('')
@@ -393,7 +393,8 @@ elif mode == "Admin":
             plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
             st.pyplot(fig)
             
-            col_left, col_right = st.columns(2)
+            # Export & Clear Buttons in Admin (placed side by side with a gap)
+            col_left, col_gap, col_right = st.columns([1, 0.5, 1])
             with col_left:
                 export_json = df.to_json(orient="records", indent=4)
                 st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
