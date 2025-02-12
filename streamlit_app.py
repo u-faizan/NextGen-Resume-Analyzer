@@ -136,11 +136,9 @@ Here is the resume text:
         st.warning("There was an issue with the API response. Try again, it might work this time.")
         return {"error": f"API Error {response.status_code}: {response.text}"}
 
-
 # ------------------------
 # PDF Text Extraction
 # ------------------------
-
 def extract_text_from_pdf(uploaded_file):
     if uploaded_file is not None:
         with open("temp_resume.pdf", "wb") as f:
@@ -148,19 +146,12 @@ def extract_text_from_pdf(uploaded_file):
         return extract_text("temp_resume.pdf")
     else:
         return ""
-        
-
-
-
 
 # ------------------------
 # Streamlit App
 # ------------------------
 st.set_page_config(page_title="NextGen Resume Analyzer", page_icon="📄")
 st.sidebar.title("User Mode")
-# Sidebar styling
-# Sidebar styling
-# Sidebar styling
 st.markdown(
     """
     <style>
@@ -169,7 +160,7 @@ st.markdown(
             color: white !important;
         }
         [data-testid="stSidebar"] * {
-            color: white !important; /* Sidebar text color */
+            color: white !important;
         }
         /* Fix select box text color */
         div[data-baseweb="select"] {
@@ -178,20 +169,17 @@ st.markdown(
         div[data-baseweb="select"] * {
             color: black !important;
         }
-        /* Ensure selected value inside box is black */
         div[data-baseweb="select"] > div {
             color: black !important;
         }
-
         .stButton > button {
-            background-color: #15967D !important; /* Matching Button Color */
+            background-color: #15967D !important;
             color: white !important;
             font-size: 16px;
             font-weight: bold;
             padding: 8px 20px;
             border-radius: 5px;
         }
-        
     </style>
     """,
     unsafe_allow_html=True
@@ -349,8 +337,7 @@ elif mode == "Admin":
             # Resume Score Chart
             st.subheader("Resume Score Distribution")
             st.bar_chart(df['Resume Score'])
-
-
+        
             # Top Skills Chart
             st.subheader("Top Skills Overview")
             
@@ -383,6 +370,4 @@ elif mode == "Admin":
             plot_pie(axes[0], top_current_skills, "Current Skills")
             plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
             
-            # Display the figure in Streamlit
             st.pyplot(fig)
-
