@@ -457,7 +457,7 @@ if mode == "Admin":
             if admin_user == st.secrets["user_name"] and admin_pass == st.secrets["pass"]:
                 st.session_state.admin_logged_in = True
                 st.success("Logged in as Admin")
-                st.rerun()
+                st.experimental_rerun()
             else:
                 st.error("Invalid Admin Credentials")
 
@@ -465,7 +465,10 @@ if mode == "Admin":
         # Fetch data from database
         cursor.execute("SELECT * FROM user_data")
         data = cursor.fetchall()
-        df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp'])
+        df = pd.DataFrame(
+            data,
+            columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp']
+        )
         
         st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
         st.dataframe(df)
@@ -475,7 +478,12 @@ if mode == "Admin":
         
         st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
         def get_top_skills(skill_series, top_n=5):
-            skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
+            # Filter out NaN values and empty strings, ensuring all entries are strings.
+            skills = [str(s).strip() for s in skill_series if pd.notna(s) and str(s).strip() != ""]
+            if not skills:
+                return pd.Series(dtype=int)
+            # Join all skill entries into one string and split by comma.
+            skill_counts = pd.Series(", ".join(skills).split(", ")).value_counts()
             if len(skill_counts) > top_n:
                 top_skills = skill_counts.head(top_n)
                 top_skills.loc["Others"] = skill_counts[top_n:].sum()
@@ -490,11 +498,17 @@ if mode == "Admin":
         fig, axes = plt.subplots(1, 2, figsize=(20, 12))
         plt.subplots_adjust(wspace=0.3)
         def plot_pie(ax, data, title):
-            data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
+            data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor': 'white'}, legend=False)
             ax.set_ylabel('')
             ax.set_title(title)
-        plot_pie(axes[0], top_current_skills, "Current Skills")
-        plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
+        if not top_current_skills.empty:
+            plot_pie(axes[0], top_current_skills, "Current Skills")
+        else:
+            axes[0].text(0.5, 0.5, "No Data", horizontalalignment='center', verticalalignment='center')
+        if not top_recommended_skills.empty:
+            plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
+        else:
+            axes[1].text(0.5, 0.5, "No Data", horizontalalignment='center', verticalalignment='center')
         st.pyplot(fig)
         
         # Manage Data Section: Export and Clear Buttons
@@ -508,4 +522,5 @@ if mode == "Admin":
                 cursor.execute("DELETE FROM user_data")
                 conn.commit()
                 st.success("All results have been cleared from the database.")
-                st.rerun()  # Forces an immediate refresh
+                st.experimental_rerun()  # Forces an immediate refresh
+
