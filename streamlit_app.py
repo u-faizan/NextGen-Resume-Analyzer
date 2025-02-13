@@ -16,8 +16,7 @@ import base64
 
 def extract_json(response_text):
     """
-    Extracts JSON from a string using a regex.
-    Returns a dictionary if valid JSON is found; otherwise, shows an error.
+    Extracts JSON from a string using regex.
     """
     json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
     if json_match:
@@ -33,32 +32,35 @@ def extract_json(response_text):
 
 def validate_resume(text):
     """
-    Checks if the extracted resume text contains common resume keywords.
-    Returns True if at least one keyword is found.
+    Checks if the extracted text contains common resume keywords.
     """
     keywords = ["education", "experience", "skills", "projects", "certifications"]
     return any(keyword in text.lower() for keyword in keywords)
 
 def get_top_skills(skill_series, top_n=5):
     """
-    Groups and counts skills from a series of strings.
-    Filters out None values and groups any extra skills under 'Others'.
+    Groups and counts skills from a Series, filtering out empty values and
+    grouping extras under 'Others'.
     """
-    # Convert all entries to strings and filter out None
-    clean_skills = [str(s) for s in skill_series if s is not None]
-    # Join all skills into one string then split by comma
-    skill_counts = pd.Series(", ".join(clean_skills).split(", ")).value_counts()
-    if len(skill_counts) > top_n:
-        top_skills = skill_counts.head(top_n)
-        top_skills.loc["Others"] = skill_counts[top_n:].sum()
+    # Clean the series: remove NaNs and empty strings
+    cleaned = [str(skill) for skill in skill_series if pd.notna(skill) and str(skill).strip()]
+    if not cleaned:
+        return pd.Series(dtype=int)
+    # Join the cleaned strings and split by comma
+    skills_list = ", ".join(cleaned).split(", ")
+    counts = pd.Series(skills_list).value_counts()
+    if len(counts) > top_n:
+        top_skills = counts.head(top_n)
+        top_skills["Others"] = counts.iloc[top_n:].sum()
         return top_skills
-    return skill_counts
+    return counts
 
 # ===========================
 # Database Setup
 # ===========================
-# Create or connect to the SQLite database
-conn = sqlite3.connect('resume_data.db', check_same_thread=False)
+
+# Connect to (or create) the SQLite database
+conn = sqlite3.connect('resume_data.db')
 cursor = conn.cursor()
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_data (
@@ -75,17 +77,18 @@ cursor.execute('''
 conn.commit()
 
 # ===========================
-# API Configuration and Resume Analysis
+# API Configuration & Resume Analysis
 # ===========================
+
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 API_KEY = st.secrets["API_KEY"]
 
 def get_resume_analysis(resume_text):
     """
-    Sends a prompt with the resume text to the API and returns the parsed JSON result.
+    Sends resume text to the API and returns the analysis result.
     """
     prompt = f"""
-You are an expert resume analyzer. Extract and output the following information strictly in JSON format. Do not include any explanations or extra text.
+You are an expert resume analyzer. Extract and output the following information strictly in JSON format. Do not include any explanations, comments, or additional text outside the JSON block.
 
 Evaluation Criteria for Resume Score:
 - Formatting and structure (clear sections, bullet points)
@@ -158,30 +161,30 @@ Here is the resume text:
 # ===========================
 # PDF Text Extraction
 # ===========================
+
 def extract_text_from_pdf(uploaded_file):
     """
-    Saves the uploaded PDF to a temporary file and extracts its text.
+    Saves an uploaded PDF to disk temporarily and extracts text from it.
     """
     if uploaded_file is not None:
         with open("temp_resume.pdf", "wb") as f:
             f.write(uploaded_file.getbuffer())
         return extract_text("temp_resume.pdf")
-    return ""
+    else:
+        return ""
 
 # ===========================
-# Main App
+# Main App Layout and Branding
 # ===========================
 
-# --- Header with Branding ---
+# Header with Branding
 st.markdown("""
 <div style="background-color:#15967D; padding:20px; text-align:left; border-bottom: 3px solid #15967D;">
-    <!-- Replace 'my-image.png' with your actual image file in the same directory -->
-    <img src="my-image.png" style="vertical-align:middle; margin-right:10px;">
     <span style="font-size: 2.5em; font-weight: bold; color:white;"> 📝 NextGen Resume Analyzer</span>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar ---
+# Sidebar styling and mode selection
 st.sidebar.title("User Mode")
 st.markdown(
     """
@@ -211,18 +214,27 @@ st.markdown(
             border-radius: 5px;
         }
     </style>
-    """, unsafe_allow_html=True
+    """,
+    unsafe_allow_html=True
 )
 
-# --- Mode Selection ---
+# Navigation between User and Admin modes
 mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 
 # ===========================
-# User Mode Code
+# User Mode
 # ===========================
 if mode == "User":
     st.title("User Dashboard")
-    uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
+
+    # Check if an analysis result already exists in session state
+    if "analysis_result" not in st.session_state:
+        # File uploader for resume (PDF)
+        uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
+    else:
+        # If analysis was already performed, no need to show uploader
+        uploaded_file = None
+
     if uploaded_file:
         st.success("File uploaded successfully!")
         resume_text = extract_text_from_pdf(uploaded_file)
@@ -237,179 +249,292 @@ if mode == "User":
                 if "error" in result:
                     st.error(result["error"])
                 else:
-                    # --- Greeting & Basic Info Section ---
-                    basic_info = result.get("basic_info", {})
-                    if basic_info.get("name"):
-                        st.markdown(f"<h2 style='color:#15967D;'>Hello, {basic_info.get('name')}!</h2>", unsafe_allow_html=True)
-                    
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">Basic Info</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.markdown(f"""
-                    <div style="background-color:#F5F5F5; padding:15px; border-radius:5px; margin-bottom:20px;">
-                        <strong>Name:</strong> {basic_info.get('name', 'N/A')}<br>
-                        <strong>Email:</strong> {basic_info.get('email', 'N/A')}<br>
-                        <strong>Mobile:</strong> {basic_info.get('mobile', 'N/A')}<br>
-                        <strong>Address:</strong> {basic_info.get('address', 'N/A')}
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    # --- AI Resume Summary Section ---
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">AI Resume Summary</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>A concise summary of your experience, skills, and expertise, tailored for ATS optimization. This summary provides a quick overview for hiring managers.</p>", unsafe_allow_html=True)
-                    st.markdown(f"""
-                    <div style="background-color:#F5F5F5; padding:15px; border-left: 4px solid #15967D; border-radius:3px; margin-bottom:20px;">
-                        {result.get('ai_resume_summary', '')}
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    # --- Resume Score Section ---
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">Resume Score</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    resume_score_raw = result.get("resume_score", "70/100")
-                    if isinstance(resume_score_raw, int):
-                        resume_score = resume_score_raw
-                    elif isinstance(resume_score_raw, str):
-                        resume_score_match = re.search(r'\d+', resume_score_raw)
-                        resume_score = int(resume_score_match.group()) if resume_score_match else 70
+                    # Store analysis result in session state to prevent loss on rerun
+                    st.session_state.analysis_result = result
+
+    # If an analysis result exists in session state, display it
+    if "analysis_result" in st.session_state:
+        result = st.session_state.analysis_result
+
+        # --- Greeting & Basic Info Section ---
+        basic_info = result.get("basic_info", {})
+        if basic_info.get("name"):
+            st.markdown(f"<h2 style='color:#15967D;'>Hello, {basic_info.get('name')}!</h2>", unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Basic Info</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style="background-color:#F5F5F5; padding:15px; border-radius:5px; margin-bottom:20px;">
+            <strong>Name:</strong> {basic_info.get('name', 'N/A')}<br>
+            <strong>Email:</strong> {basic_info.get('email', 'N/A')}<br>
+            <strong>Mobile:</strong> {basic_info.get('mobile', 'N/A')}<br>
+            <strong>Address:</strong> {basic_info.get('address', 'N/A')}
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # --- AI Resume Summary Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">AI Resume Summary</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>A concise summary of your experience, skills, and expertise, tailored for ATS optimization. This summary provides a quick overview for hiring managers.</p>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style="background-color:#F5F5F5; padding:15px; border-left: 4px solid #15967D; border-radius:3px; margin-bottom:20px;">
+            {result.get('ai_resume_summary', '')}
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # --- Resume Score Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Resume Score</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        resume_score_raw = result.get("resume_score", "70/100")
+        if isinstance(resume_score_raw, int):
+            resume_score = resume_score_raw
+        elif isinstance(resume_score_raw, str):
+            resume_score_match = re.search(r'\d+', resume_score_raw)
+            resume_score = int(resume_score_match.group()) if resume_score_match else 70
+        else:
+            resume_score = 70
+        st.metric(label="Score", value=f"{resume_score}/100")
+        st.markdown("<p style='font-size:14px; color:#555555;'><em>Note: The score is derived from structure, keyword usage, clarity, and overall presentation.</em></p>", unsafe_allow_html=True)
+        
+        # --- Skills Section with Side-by-Side Layout ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Skills</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        col_skills1, col_skills2 = st.columns(2)
+        with col_skills1:
+            st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Current Skills</h4></div>", unsafe_allow_html=True)
+            for skill in result.get("skills", {}).get("current_skills", []):
+                st.markdown(f"- {skill}")
+        with col_skills2:
+            st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Recommended Skills</h4></div>", unsafe_allow_html=True)
+            for skill in result.get("skills", {}).get("recommended_skills", []):
+                st.markdown(f"- {skill}")
+        
+        # --- Recommended Courses Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Recommended Courses</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        st.write("Courses suggested to help you enhance your skillset:")
+        for course in result.get("course_recommendations", []):
+            if isinstance(course, dict):
+                platform = course.get("platform", "Unknown Platform")
+                course_name = course.get("course_name", "Unknown Course")
+                link = course.get("link", "#")
+                st.markdown(f"- <span style='color:#15967D; font-weight:bold;'>{platform}</span>: [{course_name}]({link})", unsafe_allow_html=True)
+            else:
+                st.markdown(f"- {course}")
+        
+        # --- Appreciation Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Appreciation</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        st.write("Positive comments acknowledging your strengths:")
+        for comment in result.get("appreciation", []):
+            st.markdown(f"- {comment}")
+        
+        # --- Resume Tips Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Resume Tips</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        st.write("Constructive suggestions for improving your resume:")
+        for tip in result.get("resume_tips", []):
+            st.markdown(f"- {tip}")
+        
+        # --- Matching Job Roles Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Matching Job Roles</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        st.write("Job roles that match your skills and experience:")
+        for role in result.get("matching_job_roles", []):
+            st.markdown(f"- {role}")
+        
+        # --- ATS Keywords Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">ATS Keywords</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        st.write("Industry-relevant keywords for better ATS performance:")
+        ats_keywords = result.get("ats_keywords", [])
+        if isinstance(ats_keywords, list):
+            for keyword in ats_keywords:
+                st.markdown(f"- {keyword}")
+        else:
+            st.json(ats_keywords)
+        
+        # --- Project Suggestions Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Project Suggestions</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        with st.expander("Improvement Tips for Existing Projects", expanded=True):
+            for tip in result.get("project_suggestions", {}).get("improvement_tips", []):
+                st.markdown(f"- {tip}")
+        with st.expander("New Project Recommendations", expanded=True):
+            for proj in result.get("project_suggestions", {}).get("new_project_recommendations", []):
+                st.markdown(f"- {proj}")
+        
+        # --- Resume Writing Tips Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Resume Writing Tips</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        st.write("Check out these high-rated YouTube videos for expert resume writing tips:")
+        col_video1, col_video2 = st.columns(2)
+        with col_video1:
+            st.video("https://youtu.be/Tt08KmFfIYQ?si=mU-0_Mcoq8SO_2qt")
+        with col_video2:
+            st.video("https://youtu.be/aD7fP-2u3iY?si=KPnyC0D7HRStOWpB")
+        
+        # --- Export Results Section (Single Instance) ---
+        st.markdown("<h3 style='color:#15967D;'>Export Your Details</h3>", unsafe_allow_html=True)
+        export_data = {
+            "Basic Info": basic_info,
+            "AI Resume Summary": result.get("ai_resume_summary", ""),
+            "Resume Score": resume_score,
+            "Skills": result.get("skills", {}),
+            "Recommended Courses": result.get("course_recommendations", []),
+            "Appreciation": result.get("appreciation", []),
+            "Resume Tips": result.get("resume_tips", []),
+            "Matching Job Roles": result.get("matching_job_roles", []),
+            "ATS Keywords": result.get("ats_keywords", []),
+            "Project Suggestions": result.get("project_suggestions", {})
+        }
+        export_json = json.dumps(export_data, indent=4)
+        st.download_button("Download Details as JSON", data=export_json, file_name="resume_analysis.json", mime="application/json")
+        
+        # --- Save Analysis to Database ---
+        cursor.execute('''
+            INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+        ''', (
+            basic_info.get("name", "N/A"),
+            basic_info.get("email", "N/A"),
+            resume_score,
+            ", ".join(result.get("skills", {}).get("current_skills", [])),
+            ", ".join(result.get("skills", {}).get("recommended_skills", [])),
+            ", ".join([course.get("course_name", "") if isinstance(course, dict) else str(course)
+                       for course in result.get("course_recommendations", [])])
+        ))
+        conn.commit()
+
+# ===========================
+# Admin Mode
+# ===========================
+if mode == "Admin":
+    st.title("🔐 Admin Dashboard")
+    
+    # Use session_state to maintain admin login state
+    if "admin_logged_in" not in st.session_state:
+        st.session_state.admin_logged_in = False
+
+    if not st.session_state.admin_logged_in:
+        admin_user = st.text_input("Username")
+        admin_pass = st.text_input("Password", type="password")
+        if st.button("Login"):
+            if admin_user == st.secrets["user_name"] and admin_pass == st.secrets["pass"]:
+                st.session_state.admin_logged_in = True
+                st.success("Logged in as Admin")
+                st.experimental_rerun()
+            else:
+                st.error("Invalid Admin Credentials")
+
+    if st.session_state.admin_logged_in:
+        # --- Display User Data ---
+        cursor.execute("SELECT * FROM user_data")
+        data = cursor.fetchall()
+        df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp'])
+        
+        st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
+        if df.empty:
+            st.info("No data available.")
+        else:
+            st.dataframe(df)
+        
+            # --- Resume Score Distribution ---
+            st.markdown("<h3 style='color:#15967D;'>Resume Score Distribution</h3>", unsafe_allow_html=True)
+            st.bar_chart(df['Resume_Score'])
+            
+            # --- Top Skills Overview using Pie Charts ---
+            st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
+            top_current_skills = get_top_skills(df['Skills'])
+            top_recommended_skills = get_top_skills(df['Recommended_Skills'])
+    
+            # Create a figure with two pie charts
+            fig, axes = plt.subplots(1, 2, figsize=(20, 12))
+            plt.subplots_adjust(wspace=0.3)
+            def plot_pie(ax, data, title):
+                data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
+                ax.set_ylabel('')
+                ax.set_title(title)
+            if not top_current_skills.empty:
+                plot_pie(axes[0], top_current_skills, "Current Skills")
+            else:
+                axes[0].text(0.5, 0.5, "No Data", horizontalalignment='center', verticalalignment='center')
+            if not top_recommended_skills.empty:
+                plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
+            else:
+                axes[1].text(0.5, 0.5, "No Data", horizontalalignment='center', verticalalignment='center')
+            st.pyplot(fig)
+            
+            # --- Manage Data Section: Export and Clear Buttons ---
+            st.markdown("<h3 style='color:#15967D;'>Manage Data</h3>", unsafe_allow_html=True)
+            col1, col_gap, col2 = st.columns([1, 0.5, 1])
+            with col1:
+                export_json = df.to_json(orient="records", indent=4)
+                st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
+            with col2:
+                if st.button("Clear Results", key="clear_admin"):
+                    cursor.execute("DELETE FROM user_data")
+                    conn.commit()
+                    st.success("All results have been cleared from the database.")
+                    st.experimental_rerun()  # Force refresh
+
+            # --- Update Database Feature ---
+            st.markdown("<h3 style='color:#15967D;'>Update Database</h3>", unsafe_allow_html=True)
+            uploaded_file = st.file_uploader("Upload JSON File to Update Database", type=["json"], key="update_json")
+            if uploaded_file is not None:
+                try:
+                    new_data = json.load(uploaded_file)
+                    if isinstance(new_data, list):
+                        for record in new_data:
+                            rec_id = record.get("ID")
+                            name = record.get("Name")
+                            email = record.get("Email")
+                            resume_score = record.get("Resume Score")
+                            skills = record.get("Skills")
+                            rec_skills = record.get("Recommended Skills")
+                            courses = record.get("Courses")
+                            timestamp = record.get("Timestamp")
+                            cursor.execute("""
+                                INSERT OR REPLACE INTO user_data (id, name, email, resume_score, skills, recommended_skills, courses, timestamp)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                            """, (rec_id, name, email, resume_score, skills, rec_skills, courses, timestamp))
+                        conn.commit()
+                        st.success("Database successfully updated!")
+                        st.experimental_rerun()  # Refresh to show updated data
                     else:
-                        resume_score = 70
-                    st.metric(label="Score", value=f"{resume_score}/100")
-                    st.markdown("<p style='font-size:14px; color:#555555;'><em>Note: The score is derived from structure, keyword usage, clarity, and overall presentation.</em></p>", unsafe_allow_html=True)
-                    
-                    # --- Skills Section (Side-by-Side Layout) ---
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">Skills</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    col_skills1, col_skills2 = st.columns(2)
-                    with col_skills1:
-                        st.markdown("""
-                        <div style="background-color:#EFEFEF; padding:10px; border-radius:5px;">
-                            <h4 style="color:#15967D;">Current Skills</h4>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        for skill in result.get("skills", {}).get("current_skills", []):
-                            st.markdown(f"- {skill}")
-                    with col_skills2:
-                        st.markdown("""
-                        <div style="background-color:#EFEFEF; padding:10px; border-radius:5px;">
-                            <h4 style="color:#15967D;">Recommended Skills</h4>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        for skill in result.get("skills", {}).get("recommended_skills", []):
-                            st.markdown(f"- {skill}")
-                    
-                    # --- Recommended Courses Section ---
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">Recommended Courses</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Courses suggested to help you enhance your skillset. These courses are recommended to improve your skills and keep you updated with industry trends.</p>", unsafe_allow_html=True)
-                    st.write("Courses suggested to help you enhance your skillset:")
-                    for course in result.get("course_recommendations", []):
-                        if isinstance(course, dict):
-                            platform = course.get("platform", "Unknown Platform")
-                            course_name = course.get("course_name", "Unknown Course")
-                            link = course.get("link", "#")
-                            st.markdown(f"- <span style='color:#15967D; font-weight:bold;'>{platform}</span>: [{course_name}]({link})", unsafe_allow_html=True)
-                        else:
-                            st.markdown(f"- {course}")
-                    
-                    # --- Appreciation Section ---
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">Appreciation</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.write("Positive comments acknowledging your strengths:")
-                    for comment in result.get("appreciation", []):
-                        st.markdown(f"- {comment}")
-                    
-                    # --- Resume Tips Section ---
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">Resume Tips</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.write("Constructive suggestions for improving your resume:")
-                    for tip in result.get("resume_tips", []):
-                        st.markdown(f"- {tip}")
-                    
-                    # --- Matching Job Roles Section ---
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">Matching Job Roles</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.write("Job roles that match your skills and experience:")
-                    for role in result.get("matching_job_roles", []):
-                        st.markdown(f"- {role}")
-                    
-                    # --- ATS Keywords Section ---
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">ATS Keywords</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Industry-relevant keywords for better ATS performance. These keywords help your resume get noticed by automated systems and recruiters alike.</p>", unsafe_allow_html=True)
-                    ats_keywords = result.get("ats_keywords", [])
-                    if isinstance(ats_keywords, list):
-                        for keyword in ats_keywords:
-                            st.markdown(f"- {keyword}")
-                    else:
-                        st.json(ats_keywords)
-                    
-                    # --- Project Suggestions Section ---
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">Project Suggestions</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    with st.expander("<div style='background-color:#EFEFEF; padding:5px; border-radius:5px; color:#15967D; font-weight:bold;'>Improvement Tips for Existing Projects</div>", expanded=True):
-                        for tip in result.get("project_suggestions", {}).get("improvement_tips", []):
-                            st.markdown(f"- {tip}")
-                    with st.expander("<div style='background-color:#EFEFEF; padding:5px; border-radius:5px; color:#15967D; font-weight:bold;'>New Project Recommendations</div>", expanded=True):
-                        for proj in result.get("project_suggestions", {}).get("new_project_recommendations", []):
-                            st.markdown(f"- {proj}")
-                    
-                    # --- Resume Writing Tips Section ---
-                    st.markdown("""
-                    <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                        <h3 style="color:white; margin:0;">Resume Writing Tips</h3>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    st.write("Check out these high-rated YouTube videos for expert resume writing tips:")
-                    col_video1, col_video2 = st.columns(2)
-                    with col_video1:
-                        st.video("https://youtu.be/Tt08KmFfIYQ?si=mU-0_Mcoq8SO_2qt")
-                    with col_video2:
-                        st.video("https://youtu.be/aD7fP-2u3iY?si=KPnyC0D7HRStOWpB")
-                    
-                    # --- Export Results Section ---
-                    st.markdown("<h3 style='color:#15967D;'>Export Your Details</h3>", unsafe_allow_html=True)
-                    export_data = {
-                        "Basic Info": basic_info,
-                        "AI Resume Summary": result.get("ai_resume_summary", ""),
-                        "Resume Score": resume_score,
-                        "Skills": result.get("skills", {}),
-                        "Recommended Courses": result.get("course_recommendations", []),
-                        "Appreciation": result.get("appreciation", []),
-                        "Resume Tips": result.get("resume_tips", []),
-                        "Matching Job Roles": result.get("matching_job_roles", []),
-                        "ATS Keywords": result.get("ats_keywords", []),
-                        "Project Suggestions": result.get("project_suggestions", {})
-                    }
-                    export_json = json.dumps(export_data, indent=4)
-                    st.download_button("Download Details as JSON", data=export_json, file_name="resume_analysis.json", mime="application/json")
+                        st.error("Invalid JSON format. Please upload a valid JSON file.")
+                except Exception as e:
+                    st.error(f"Error processing JSON file: {e}")
