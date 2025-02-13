@@ -327,7 +327,7 @@ if mode == "User":
             <h3 style="color:white; margin:0;">Recommended Courses</h3>
         </div>
         """, unsafe_allow_html=True)
-        st.write("Courses suggested to help you enhance your skillset:")
+        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Courses suggested to help you enhance your skillset:.</p>", unsafe_allow_html=True)
         for course in result.get("course_recommendations", []):
             if isinstance(course, dict):
                 platform = course.get("platform", "Unknown Platform")
