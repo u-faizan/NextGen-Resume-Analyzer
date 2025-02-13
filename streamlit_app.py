@@ -509,32 +509,3 @@ if mode == "Admin":
                 conn.commit()
                 st.success("All results have been cleared from the database.")
                 st.rerun()  # Forces an immediate refresh
-
-        # Update Database Feature: Upload JSON file to update data
-        st.markdown("<h3 style='color:#15967D;'>Update Database</h3>", unsafe_allow_html=True)
-        uploaded_file = st.file_uploader("Upload JSON File to Update Database", type=["json"], key="update_json")
-        if uploaded_file is not None:
-            try:
-                new_data = json.load(uploaded_file)
-                if isinstance(new_data, list):
-                    for record in new_data:
-                        # Map JSON keys (with spaces) to DB columns (without spaces)
-                        rec_id = record.get("ID")
-                        name = record.get("Name")
-                        email = record.get("Email")
-                        resume_score = record.get("Resume Score")
-                        skills = record.get("Skills")
-                        rec_skills = record.get("Recommended Skills")
-                        courses = record.get("Courses")
-                        timestamp = record.get("Timestamp")
-                        cursor.execute("""
-                            INSERT OR REPLACE INTO user_data (id, name, email, resume_score, skills, recommended_skills, courses, timestamp)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                        """, (rec_id, name, email, resume_score, skills, rec_skills, courses, timestamp))
-                    conn.commit()
-                    st.success("Database successfully updated!")
-                    st.rerun()  # Force refresh to show updated data
-                else:
-                    st.error("Invalid JSON format. Please upload a valid JSON file.")
-            except Exception as e:
-                st.error(f"Error processing JSON file: {e}")
