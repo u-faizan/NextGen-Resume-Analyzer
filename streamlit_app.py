@@ -224,65 +224,23 @@ mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 # ===========================
 # Sidebar: About / Contact Info
 # ===========================
-st.sidebar.markdown(
-    """
-    <style>
-    /* Container styling for the sidebar */
-    .sidebar-container {
-        background-color: #FFFFFF; /* White container for contrast against teal sidebar */
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* Subtle shadow */
-    }
-    /* Headings inside the container */
-    .sidebar-heading {
-        color: #15967D; /* Matches your brand teal */
-        margin: 0 0 8px 0;
-        font-size: 1.1em;
-        font-weight: bold;
-    }
-    /* Paragraph text styling */
-    .sidebar-text {
-        color: #333333; /* Dark text for high contrast */
-        font-size: 0.9em;
-        line-height: 1.4;
-        margin: 0; /* Tighter vertical spacing */
-    }
-    /* Link styling */
-    .sidebar-text a {
-        color: #15967D; /* Brand teal for links */
-        text-decoration: none;
-        font-weight: bold;
-    }
-    </style>
+st.sidebar.markdown("## About This App")
+st.sidebar.write(
+    "NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure, "
+    "keyword optimization, and overall effectiveness. Gain insights into how your resume "
+    "performs against Applicant Tracking Systems (ATS) and discover personalized tips "
+    "for improvement."
+)
 
-    <div class="sidebar-container">
-        <h3 class="sidebar-heading">About This App</h3>
-        <p class="sidebar-text">
-            NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure,
-            keyword optimization, and overall effectiveness. Gain insights into how your resume
-            performs against Applicant Tracking Systems (ATS) and discover personalized tips
-            for improvement.
-        </p>
-    </div>
+st.sidebar.markdown("---")
 
-    <div class="sidebar-container">
-        <h3 class="sidebar-heading">About the Developer</h3>
-        <p class="sidebar-text">
-            Developed by <strong>Faizan</strong><br/>
-            <strong>Email:</strong> 
-            <a href="mailto:mianumarzareen@gmail.com">mianumarzareen@gmail.com</a><br/>
-            <strong>GitHub Repo:</strong> 
-            <a href="https://github.com/u-faizan/NextGen-Resume-Analyzer" target="_blank">
-                NextGen-Resume-Analyzer
-            </a>
-            <br/><br/>
-            Feel free to reach out for any questions, feedback, or collaborations!
-        </p>
-    </div>
-    """,
-    unsafe_allow_html=True
+st.sidebar.markdown("## About the Developer")
+st.sidebar.write(
+    "Developed by **Faizan**  \n"
+    "**Email:** [mianumarzareen@gmail.com](mailto:mianumarzareen@gmail.com)  \n"
+    "**GitHub Repo:** [NextGen-Resume-Analyzer]"
+    "(https://github.com/u-faizan/NextGen-Resume-Analyzer)  \n\n"
+    "Feel free to reach out for any questions, feedback, or collaborations!"
 )
 
 
