@@ -13,8 +13,12 @@ import base64
 # ===========================
 # Helper Functions
 # ===========================
+
 def extract_json(response_text):
-    """Extracts JSON from a string using regex."""
+    """
+    Extracts JSON from a string using a regex.
+    Returns a dictionary if valid JSON is found; otherwise, shows an error.
+    """
     json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
     if json_match:
         json_text = json_match.group(0)
@@ -28,13 +32,22 @@ def extract_json(response_text):
         return {}
 
 def validate_resume(text):
-    """Checks if the extracted text contains common resume keywords."""
+    """
+    Checks if the extracted resume text contains common resume keywords.
+    Returns True if at least one keyword is found.
+    """
     keywords = ["education", "experience", "skills", "projects", "certifications"]
     return any(keyword in text.lower() for keyword in keywords)
 
 def get_top_skills(skill_series, top_n=5):
-    """Groups and counts skills, grouping extras under 'Others'."""
-    skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
+    """
+    Groups and counts skills from a series of strings.
+    Filters out None values and groups any extra skills under 'Others'.
+    """
+    # Convert all entries to strings and filter out None
+    clean_skills = [str(s) for s in skill_series if s is not None]
+    # Join all skills into one string then split by comma
+    skill_counts = pd.Series(", ".join(clean_skills).split(", ")).value_counts()
     if len(skill_counts) > top_n:
         top_skills = skill_counts.head(top_n)
         top_skills.loc["Others"] = skill_counts[top_n:].sum()
@@ -44,7 +57,8 @@ def get_top_skills(skill_series, top_n=5):
 # ===========================
 # Database Setup
 # ===========================
-conn = sqlite3.connect('resume_data.db')
+# Create or connect to the SQLite database
+conn = sqlite3.connect('resume_data.db', check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_data (
@@ -67,8 +81,11 @@ API_URL = "https://openrouter.ai/api/v1/chat/completions"
 API_KEY = st.secrets["API_KEY"]
 
 def get_resume_analysis(resume_text):
+    """
+    Sends a prompt with the resume text to the API and returns the parsed JSON result.
+    """
     prompt = f"""
-You are an expert resume analyzer. Extract and output the following information strictly in JSON format. Do not include any explanations, comments, or additional text outside the JSON block.
+You are an expert resume analyzer. Extract and output the following information strictly in JSON format. Do not include any explanations or extra text.
 
 Evaluation Criteria for Resume Score:
 - Formatting and structure (clear sections, bullet points)
@@ -142,24 +159,29 @@ Here is the resume text:
 # PDF Text Extraction
 # ===========================
 def extract_text_from_pdf(uploaded_file):
+    """
+    Saves the uploaded PDF to a temporary file and extracts its text.
+    """
     if uploaded_file is not None:
         with open("temp_resume.pdf", "wb") as f:
             f.write(uploaded_file.getbuffer())
         return extract_text("temp_resume.pdf")
-    else:
-        return ""
+    return ""
 
 # ===========================
 # Main App
 # ===========================
-# Header with Branding: Project Name in a border matching sidebar style
+
+# --- Header with Branding ---
 st.markdown("""
 <div style="background-color:#15967D; padding:20px; text-align:left; border-bottom: 3px solid #15967D;">
+    <!-- Replace 'my-image.png' with your actual image file in the same directory -->
+    <img src="my-image.png" style="vertical-align:middle; margin-right:10px;">
     <span style="font-size: 2.5em; font-weight: bold; color:white;"> 📝 NextGen Resume Analyzer</span>
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar remains unchanged
+# --- Sidebar ---
 st.sidebar.title("User Mode")
 st.markdown(
     """
@@ -189,13 +211,15 @@ st.markdown(
             border-radius: 5px;
         }
     </style>
-    """,
-    unsafe_allow_html=True
+    """, unsafe_allow_html=True
 )
 
-# Navigation: "User" and "Admin" modes only.
+# --- Mode Selection ---
 mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 
+# ===========================
+# User Mode Code
+# ===========================
 if mode == "User":
     st.title("User Dashboard")
     uploaded_file = st.file_uploader("Upload Your Resume (PDF)", type=["pdf"])
@@ -262,7 +286,7 @@ if mode == "User":
                     st.metric(label="Score", value=f"{resume_score}/100")
                     st.markdown("<p style='font-size:14px; color:#555555;'><em>Note: The score is derived from structure, keyword usage, clarity, and overall presentation.</em></p>", unsafe_allow_html=True)
                     
-                    # --- Skills Section with Side-by-Side Layout ---
+                    # --- Skills Section (Side-by-Side Layout) ---
                     st.markdown("""
                     <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
                         <h3 style="color:white; margin:0;">Skills</h3>
@@ -270,11 +294,19 @@ if mode == "User":
                     """, unsafe_allow_html=True)
                     col_skills1, col_skills2 = st.columns(2)
                     with col_skills1:
-                        st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Current Skills</h4></div>", unsafe_allow_html=True)
+                        st.markdown("""
+                        <div style="background-color:#EFEFEF; padding:10px; border-radius:5px;">
+                            <h4 style="color:#15967D;">Current Skills</h4>
+                        </div>
+                        """, unsafe_allow_html=True)
                         for skill in result.get("skills", {}).get("current_skills", []):
                             st.markdown(f"- {skill}")
                     with col_skills2:
-                        st.markdown("<div style='background-color:#EFEFEF; padding:10px; border-radius:5px;'><h4 style='color:#15967D;'>Recommended Skills</h4></div>", unsafe_allow_html=True)
+                        st.markdown("""
+                        <div style="background-color:#EFEFEF; padding:10px; border-radius:5px;">
+                            <h4 style="color:#15967D;">Recommended Skills</h4>
+                        </div>
+                        """, unsafe_allow_html=True)
                         for skill in result.get("skills", {}).get("recommended_skills", []):
                             st.markdown(f"- {skill}")
                     
@@ -284,6 +316,7 @@ if mode == "User":
                         <h3 style="color:white; margin:0;">Recommended Courses</h3>
                     </div>
                     """, unsafe_allow_html=True)
+                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Courses suggested to help you enhance your skillset. These courses are recommended to improve your skills and keep you updated with industry trends.</p>", unsafe_allow_html=True)
                     st.write("Courses suggested to help you enhance your skillset:")
                     for course in result.get("course_recommendations", []):
                         if isinstance(course, dict):
@@ -330,7 +363,7 @@ if mode == "User":
                         <h3 style="color:white; margin:0;">ATS Keywords</h3>
                     </div>
                     """, unsafe_allow_html=True)
-                    st.write("Industry-relevant keywords for better ATS performance. These keywords help your resume get noticed by automated systems and recruiters alike.")
+                    st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Industry-relevant keywords for better ATS performance. These keywords help your resume get noticed by automated systems and recruiters alike.</p>", unsafe_allow_html=True)
                     ats_keywords = result.get("ats_keywords", [])
                     if isinstance(ats_keywords, list):
                         for keyword in ats_keywords:
@@ -344,10 +377,10 @@ if mode == "User":
                         <h3 style="color:white; margin:0;">Project Suggestions</h3>
                     </div>
                     """, unsafe_allow_html=True)
-                    with st.expander("Improvement Tips for Existing Projects", expanded=True):
+                    with st.expander("<div style='background-color:#EFEFEF; padding:5px; border-radius:5px; color:#15967D; font-weight:bold;'>Improvement Tips for Existing Projects</div>", expanded=True):
                         for tip in result.get("project_suggestions", {}).get("improvement_tips", []):
                             st.markdown(f"- {tip}")
-                    with st.expander("New Project Recommendations", expanded=True):
+                    with st.expander("<div style='background-color:#EFEFEF; padding:5px; border-radius:5px; color:#15967D; font-weight:bold;'>New Project Recommendations</div>", expanded=True):
                         for proj in result.get("project_suggestions", {}).get("new_project_recommendations", []):
                             st.markdown(f"- {proj}")
                     
@@ -380,135 +413,3 @@ if mode == "User":
                     }
                     export_json = json.dumps(export_data, indent=4)
                     st.download_button("Download Details as JSON", data=export_json, file_name="resume_analysis.json", mime="application/json")
-
-
-                    
-                    # --- Export Results Section ---
-                    st.markdown("<h3 style='color:#15967D;'>Export Your Details</h3>", unsafe_allow_html=True)
-                    export_data = {
-                        "Basic Info": basic_info,
-                        "AI Resume Summary": result.get("ai_resume_summary", ""),
-                        "Resume Score": resume_score,
-                        "Skills": result.get("skills", {}),
-                        "Recommended Courses": result.get("course_recommendations", []),
-                        "Appreciation": result.get("appreciation", []),
-                        "Resume Tips": result.get("resume_tips", []),
-                        "Matching Job Roles": result.get("matching_job_roles", []),
-                        "ATS Keywords": result.get("ats_keywords", []),
-                        "Project Suggestions": result.get("project_suggestions", {})
-                    }
-                    export_json = json.dumps(export_data, indent=4)
-                    st.download_button("Download Details as JSON", data=export_json, file_name="resume_analysis.json", mime="application/json")
-                    
-                    # --- Save to Database ---
-                    cursor.execute('''
-                        INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, timestamp)
-                        VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
-                    ''', (
-                        basic_info.get("name", "N/A"),
-                        basic_info.get("email", "N/A"),
-                        resume_score,
-                        ", ".join(result.get("skills", {}).get("current_skills", [])),
-                        ", ".join(result.get("skills", {}).get("recommended_skills", [])),
-                        ", ".join([course.get("course_name", "") if isinstance(course, dict) else str(course)
-                                   for course in result.get("course_recommendations", [])])
-                    ))
-                    conn.commit()
-
-# --- Admin Panel Code ---
-if mode == "Admin":
-    st.title("🔐 Admin Dashboard")
-    
-    # Store login state in session_state
-    if "admin_logged_in" not in st.session_state:
-        st.session_state.admin_logged_in = False
-
-    if not st.session_state.admin_logged_in:
-        admin_user = st.text_input("Username")
-        admin_pass = st.text_input("Password", type="password")
-        if st.button("Login"):
-            if admin_user == st.secrets["user_name"] and admin_pass == st.secrets["pass"]:
-                st.session_state.admin_logged_in = True
-                st.success("Logged in as Admin")
-                st.rerun()
-            else:
-                st.error("Invalid Admin Credentials")
-
-    if st.session_state.admin_logged_in:
-        # Fetch data from database
-        cursor.execute("SELECT * FROM user_data")
-        data = cursor.fetchall()
-        df = pd.DataFrame(data, columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp'])
-        
-        st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
-        st.dataframe(df)
-        
-        st.markdown("<h3 style='color:#15967D;'>Resume Score Distribution</h3>", unsafe_allow_html=True)
-        st.bar_chart(df['Resume_Score'])
-        
-        st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
-        def get_top_skills(skill_series, top_n=5):
-            skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
-            if len(skill_counts) > top_n:
-                top_skills = skill_counts.head(top_n)
-                top_skills.loc["Others"] = skill_counts[top_n:].sum()
-            else:
-                top_skills = skill_counts
-            return top_skills
-
-        top_current_skills = get_top_skills(df['Skills'])
-        top_recommended_skills = get_top_skills(df['Recommended_Skills'])
-
-        # Create common figure with increased size and reduced gap
-        fig, axes = plt.subplots(1, 2, figsize=(20, 12))
-        plt.subplots_adjust(wspace=0.3)
-        def plot_pie(ax, data, title):
-            data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor':'white'}, legend=False)
-            ax.set_ylabel('')
-            ax.set_title(title)
-        plot_pie(axes[0], top_current_skills, "Current Skills")
-        plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
-        st.pyplot(fig)
-        
-        # Manage Data Section: Export and Clear Buttons
-        st.markdown("<h3 style='color:#15967D;'>Manage Data</h3>", unsafe_allow_html=True)
-        col1, col_gap, col2 = st.columns([1, 0.5, 1])
-        with col1:
-            export_json = df.to_json(orient="records", indent=4)
-            st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
-        with col2:
-            if st.button("Clear Results", key="clear_admin"):
-                cursor.execute("DELETE FROM user_data")
-                conn.commit()
-                st.success("All results have been cleared from the database.")
-                st.rerun()  # Forces an immediate refresh
-
-        # Update Database Feature: Upload JSON file to update data
-        st.markdown("<h3 style='color:#15967D;'>Update Database</h3>", unsafe_allow_html=True)
-        uploaded_file = st.file_uploader("Upload JSON File to Update Database", type=["json"], key="update_json")
-        if uploaded_file is not None:
-            try:
-                new_data = json.load(uploaded_file)
-                if isinstance(new_data, list):
-                    for record in new_data:
-                        # Map JSON keys (with spaces) to DB columns (without spaces)
-                        rec_id = record.get("ID")
-                        name = record.get("Name")
-                        email = record.get("Email")
-                        resume_score = record.get("Resume Score")
-                        skills = record.get("Skills")
-                        rec_skills = record.get("Recommended Skills")
-                        courses = record.get("Courses")
-                        timestamp = record.get("Timestamp")
-                        cursor.execute("""
-                            INSERT OR REPLACE INTO user_data (id, name, email, resume_score, skills, recommended_skills, courses, timestamp)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                        """, (rec_id, name, email, resume_score, skills, rec_skills, courses, timestamp))
-                    conn.commit()
-                    st.success("Database successfully updated!")
-                    st.rerun()  # Force refresh to show updated data
-                else:
-                    st.error("Invalid JSON format. Please upload a valid JSON file.")
-            except Exception as e:
-                st.error(f"Error processing JSON file: {e}")
-
