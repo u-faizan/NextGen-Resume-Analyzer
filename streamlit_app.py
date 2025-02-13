@@ -267,7 +267,7 @@ st.sidebar.markdown(
     <br>
     <div class="sidebar-heading">About the Developer</div>
     <p class="sidebar-body">
-        Developed by <strong>Umar</strong><br>
+        Developed by <strong>Umar Faizan</strong><br>
         <strong>Email:</strong> <a href="mailto:mianumarzareen@gmail.com">mianumarzareen@gmail.com</a><br>
         <strong>GitHub Repo:</strong> <a href="https://github.com/u-faizan/NextGen-Resume-Analyzer" target="_blank">NextGen-Resume-Analyzer</a><br>
         Feel free to reach out for any questions, feedback, or collaborations!
