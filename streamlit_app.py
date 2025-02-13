@@ -222,31 +222,71 @@ st.markdown(
 mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 
 # ===========================
-# Sidebar: About / How-To / Contact
+# Sidebar: About / How-to / Contact
 # ===========================
 st.sidebar.markdown(
     """
-    ## **About This App**
+    <style>
+    /* Heading styling */
+    .sidebar-heading {
+        background-color: #15967D; /* Teal background for headings */
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 1.0em;
+        font-weight: bold;
+        margin-top: 1em;
+        margin-bottom: 5px;
+    }
+    /* Body text styling */
+    .sidebar-text {
+        background-color: #F2F2F2; /* Light gray container */
+        color: #333333;
+        font-size: 0.9em;
+        line-height: 1.4;
+        padding: 10px 15px;
+        border-radius: 4px;
+        margin-bottom: 1em;
+        text-align: justify;
+        text-indent: 1.5em; /* Indent the first line */
+    }
+    </style>
 
-    &emsp;NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure, 
-    keyword optimization, and overall effectiveness. Gain insights into how your resume 
-    performs against Applicant Tracking Systems (ATS) and discover personalized tips 
-    for improvement.
+    <!-- About This App -->
+    <div class="sidebar-heading">About This App</div>
+    <div class="sidebar-text">
+        NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure, 
+        keyword optimization, and overall effectiveness. Gain insights into how your resume 
+        performs against Applicant Tracking Systems (ATS) and discover personalized tips 
+        for improvement.
+    </div>
 
-    ## **How to Use This App**
-    1. **Upload** your resume (PDF format) using the "Upload Your Resume" widget.
-    2. **Click** the "Analyze Resume" button after a successful upload.
-    3. **Wait** a few seconds for the analysis to complete.
-    4. **Explore** your personalized resume feedback, tips, and recommendations!
+    <!-- How to Use This App -->
+    <div class="sidebar-heading">How to Use This App</div>
+    <div class="sidebar-text">
+        <ol>
+            <li><strong>Upload</strong> your resume (PDF format) using the "Upload Your Resume" widget.</li>
+            <li><strong>Click</strong> the "Analyze Resume" button after a successful upload.</li>
+            <li><strong>Wait</strong> a few seconds for the analysis to complete.</li>
+            <li><strong>Explore</strong> your personalized resume feedback, tips, and recommendations!</li>
+        </ol>
+    </div>
 
-    ## **About the Developer**
-
-    Developed by **Faizan**  
-    **Email:** [mianumarzareen@gmail.com](mailto:mianumarzareen@gmail.com)  
-    **GitHub Repo:** [NextGen-Resume-Analyzer](https://github.com/u-faizan/NextGen-Resume-Analyzer)  
-
-    Feel free to reach out for any questions, feedback, or collaborations!
-    """
+    <!-- About the Developer -->
+    <div class="sidebar-heading">About the Developer</div>
+    <div class="sidebar-text">
+        Developed by <strong>Faizan</strong><br/>
+        <strong>Email:</strong> 
+        <a href="mailto:mianumarzareen@gmail.com">mianumarzareen@gmail.com</a><br/>
+        <strong>GitHub Repo:</strong> 
+        <a href="https://github.com/u-faizan/NextGen-Resume-Analyzer" target="_blank">
+            NextGen-Resume-Analyzer
+        </a>
+        <br/><br/>
+        Feel free to reach out for any questions, feedback, or collaborations!
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 
