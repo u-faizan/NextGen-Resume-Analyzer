@@ -227,29 +227,31 @@ mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 st.sidebar.markdown(
     """
     <style>
-    /* Container styling */
+    /* Container styling for the sidebar */
     .sidebar-container {
-        background-color: #DCEEEE; /* Light shade complementing #15967D */
+        background-color: #FFFFFF; /* White container for contrast against teal sidebar */
         padding: 15px;
         border-radius: 5px;
         margin-bottom: 20px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* Subtle shadow */
     }
     /* Headings inside the container */
     .sidebar-heading {
+        color: #15967D; /* Matches your brand teal */
+        margin: 0 0 8px 0;
         font-size: 1.1em;
-        margin: 0;
-        color: #15967D; /* Matches the brand color */
+        font-weight: bold;
     }
-    /* Body text styling */
+    /* Paragraph text styling */
     .sidebar-text {
-        color: #333333; /* Dark text for contrast */
+        color: #333333; /* Dark text for high contrast */
         font-size: 0.9em;
         line-height: 1.4;
-        margin-top: 8px;
+        margin: 0; /* Tighter vertical spacing */
     }
     /* Link styling */
     .sidebar-text a {
-        color: #15967D; /* Match brand color for links */
+        color: #15967D; /* Brand teal for links */
         text-decoration: none;
         font-weight: bold;
     }
