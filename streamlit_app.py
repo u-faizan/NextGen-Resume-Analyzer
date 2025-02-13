@@ -58,8 +58,8 @@ def get_top_skills(skill_series, top_n=5):
 # ===========================
 # Database Setup
 # ===========================
-
-# Connect to (or create) the SQLite database
+# Connect to (or create) the SQLite database.
+# Note: The table now includes a "feedback" column.
 conn = sqlite3.connect('resume_data.db')
 cursor = conn.cursor()
 cursor.execute('''
@@ -71,6 +71,7 @@ cursor.execute('''
         skills TEXT,
         recommended_skills TEXT,
         courses TEXT,
+        feedback TEXT,
         timestamp TEXT
     )
 ''')
@@ -79,7 +80,6 @@ conn.commit()
 # ===========================
 # API Configuration & Resume Analysis
 # ===========================
-
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 API_KEY = st.secrets["API_KEY"]
 
@@ -161,7 +161,6 @@ Here is the resume text:
 # ===========================
 # PDF Text Extraction
 # ===========================
-
 def extract_text_from_pdf(uploaded_file):
     """
     Saves an uploaded PDF to disk temporarily and extracts text from it.
@@ -176,7 +175,6 @@ def extract_text_from_pdf(uploaded_file):
 # ===========================
 # Main App Layout and Branding
 # ===========================
-
 # Header with Branding
 st.markdown("""
 <div style="background-color:#15967D; padding:20px; text-align:left; border-bottom: 3px solid #15967D;">
@@ -239,41 +237,40 @@ st.sidebar.markdown(
         margin-left: -10px; /* Shift heading slightly left */
         width: calc(100% + 10px);
     }
-    /* Styling for body text: flush left with no extra left padding */
+    /* Styling for body text within colored boxes */
     .sidebar-body {
-        margin: 0;
-        padding-left: 0;
-        padding-right: 0;
-        line-height: 1.4;
+        background-color: #F2F2F2;
+        color: #333333;
+        padding: 5px 10px;
+        border-radius: 4px;
+        margin: 0 0 10px 0;
+        text-align: left;
     }
     </style>
     
     <div class="sidebar-heading">About This App</div>
-    <p class="sidebar-body">
+    <div class="sidebar-body">
         NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure, keyword optimization, and overall effectiveness. Gain insights into how your resume performs against Applicant Tracking Systems (ATS) and discover personalized tips for improvement.
-    </p>
+    </div>
     
-    <br>
     <div class="sidebar-heading">How to Use This App</div>
-    <p class="sidebar-body">
+    <div class="sidebar-body">
         1. <strong>Upload</strong> your resume (PDF format) using the "Upload Your Resume" widget.<br>
         2. <strong>Click</strong> the "Analyze Resume" button after a successful upload.<br>
         3. <strong>Wait</strong> a few seconds for the analysis to complete.<br>
         4. <strong>Explore</strong> your personalized resume feedback, tips, and recommendations!
-    </p>
+    </div>
     
-    <br>
     <div class="sidebar-heading">About the Developer</div>
-    <p class="sidebar-body">
+    <div class="sidebar-body">
         Developed by <strong>Faizan</strong><br>
         <strong>Email:</strong> <a href="mailto:mianumarzareen@gmail.com">mianumarzareen@gmail.com</a><br>
         <strong>GitHub Repo:</strong> <a href="https://github.com/u-faizan/NextGen-Resume-Analyzer" target="_blank">NextGen-Resume-Analyzer</a><br>
         Feel free to reach out for any questions, feedback, or collaborations!
-    </p>
+    </div>
     """,
     unsafe_allow_html=True
 )
-
 
 # ===========================
 # User Mode
@@ -306,14 +303,19 @@ if mode == "User":
                     # Store analysis result in session state to prevent loss on rerun
                     st.session_state.analysis_result = result
 
-    # If an analysis result exists in session state, display it
     if "analysis_result" in st.session_state:
         result = st.session_state.analysis_result
 
         # --- Greeting & Basic Info Section ---
         basic_info = result.get("basic_info", {})
-        if basic_info.get("name"):
-            st.markdown(f"<h2 style='color:#15967D;'>Hello, {basic_info.get('name')}!</h2>", unsafe_allow_html=True)
+        # Use "Null" as placeholder if missing
+        name = basic_info.get("name", "Null")
+        email = basic_info.get("email", "Null")
+        mobile = basic_info.get("mobile", "Null")
+        address = basic_info.get("address", "Null")
+        
+        if name != "Null":
+            st.markdown(f"<h2 style='color:#15967D;'>Hello, {name}!</h2>", unsafe_allow_html=True)
         
         st.markdown("""
         <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
@@ -322,10 +324,10 @@ if mode == "User":
         """, unsafe_allow_html=True)
         st.markdown(f"""
         <div style="background-color:#F5F5F5; padding:15px; border-radius:5px; margin-bottom:20px;">
-            <strong>Name:</strong> {basic_info.get('name', 'N/A')}<br>
-            <strong>Email:</strong> {basic_info.get('email', 'N/A')}<br>
-            <strong>Mobile:</strong> {basic_info.get('mobile', 'N/A')}<br>
-            <strong>Address:</strong> {basic_info.get('address', 'N/A')}
+            <strong>Name:</strong> {name}<br>
+            <strong>Email:</strong> {email}<br>
+            <strong>Mobile:</strong> {mobile}<br>
+            <strong>Address:</strong> {address}
         </div>
         """, unsafe_allow_html=True)
         
@@ -338,7 +340,7 @@ if mode == "User":
         st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>A concise summary of your experience, skills, and expertise, tailored for ATS optimization. This summary provides a quick overview for hiring managers.</p>", unsafe_allow_html=True)
         st.markdown(f"""
         <div style="background-color:#F5F5F5; padding:15px; border-left: 4px solid #15967D; border-radius:3px; margin-bottom:20px;">
-            {result.get('ai_resume_summary', '')}
+            {result.get('ai_resume_summary', 'Null')}
         </div>
         """, unsafe_allow_html=True)
         
@@ -461,11 +463,40 @@ if mode == "User":
         with col_video2:
             st.video("https://youtu.be/aD7fP-2u3iY?si=KPnyC0D7HRStOWpB")
         
+        # --- Feedback Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Feedback</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        feedback = st.text_area("Please provide your feedback (optional):", "")
+        if st.button("Submit Feedback"):
+            cursor.execute('''
+                INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, feedback, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            ''', (
+                name,
+                email,
+                resume_score,
+                ", ".join(result.get("skills", {}).get("current_skills", [])),
+                ", ".join(result.get("skills", {}).get("recommended_skills", [])),
+                ", ".join([course.get("course_name", "Null") if isinstance(course, dict) else str(course)
+                           for course in result.get("course_recommendations", [])]),
+                feedback
+            ))
+            conn.commit()
+            st.success("Feedback submitted! Thank you.")
+
         # --- Export Results Section (Single Instance) ---
         st.markdown("<h3 style='color:#15967D;'>Export Your Details</h3>", unsafe_allow_html=True)
         export_data = {
-            "Basic Info": basic_info,
-            "AI Resume Summary": result.get("ai_resume_summary", ""),
+            "Basic Info": {
+                "name": name,
+                "email": email,
+                "mobile": mobile,
+                "address": address
+            },
+            "AI Resume Summary": result.get("ai_resume_summary", "Null"),
             "Resume Score": resume_score,
             "Skills": result.get("skills", {}),
             "Recommended Courses": result.get("course_recommendations", []),
@@ -473,30 +504,15 @@ if mode == "User":
             "Resume Tips": result.get("resume_tips", []),
             "Matching Job Roles": result.get("matching_job_roles", []),
             "ATS Keywords": result.get("ats_keywords", []),
-            "Project Suggestions": result.get("project_suggestions", {})
+            "Project Suggestions": result.get("project_suggestions", {}),
+            "Feedback": feedback
         }
         export_json = json.dumps(export_data, indent=4)
         st.download_button("Download Details as JSON", data=export_json, file_name="resume_analysis.json", mime="application/json")
-        
-        # --- Save Analysis to Database ---
-        cursor.execute('''
-            INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
-        ''', (
-            basic_info.get("name", "N/A"),
-            basic_info.get("email", "N/A"),
-            resume_score,
-            ", ".join(result.get("skills", {}).get("current_skills", [])),
-            ", ".join(result.get("skills", {}).get("recommended_skills", [])),
-            ", ".join([course.get("course_name", "") if isinstance(course, dict) else str(course)
-                       for course in result.get("course_recommendations", [])])
-        ))
-        conn.commit()
 
 # ===========================
 # Admin Mode
 # ===========================
-# --- Admin Panel Code ---
 if mode == "Admin":
     st.title("🔐 Admin Dashboard")
     
@@ -520,9 +536,10 @@ if mode == "Admin":
         def load_data():
             cursor.execute("SELECT * FROM user_data")
             data = cursor.fetchall()
+            # Updated columns list includes "Feedback"
             return pd.DataFrame(
                 data,
-                columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp']
+                columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Feedback', 'Timestamp']
             )
         
         # 1) Load the data initially
@@ -539,8 +556,6 @@ if mode == "Admin":
                 cursor.execute("DELETE FROM user_data")
                 conn.commit()
                 st.success("All results have been cleared from the database.")
-                
-                # RELOAD the data right after clearing, so we display an empty DataFrame
                 df = load_data()
 
         # 3) Now display the data (which might be empty if just cleared)
@@ -596,5 +611,3 @@ if mode == "Admin":
                 axes[1].text(0.5, 0.5, "No Data", ha='center', va='center')
 
             st.pyplot(fig)
-
-
