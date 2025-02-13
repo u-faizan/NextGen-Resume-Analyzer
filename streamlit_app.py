@@ -222,6 +222,70 @@ st.markdown(
 mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 
 # ===========================
+# Sidebar: About / Contact Info
+# ===========================
+st.sidebar.markdown(
+    """
+    <style>
+    .about-section {
+        background-color: #15967D;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .about-title {
+        color: white;
+        margin: 0;
+        font-size: 1.2em;
+    }
+    .about-text {
+        background-color: #F5F5F5;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 10px;
+        color: #333333;
+        font-size: 0.9em;
+    }
+    .about-link a {
+        color: #15967D;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    </style>
+    <div class="about-section">
+        <h3 class="about-title">About This App</h3>
+    </div>
+    <div class="about-text">
+        <p>
+            NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure, 
+            keyword optimization, and overall effectiveness. Gain insights into how your resume 
+            performs against Applicant Tracking Systems (ATS) and discover personalized tips 
+            for improvement.
+        </p>
+    </div>
+    <div class="about-section">
+        <h3 class="about-title">About the Developer</h3>
+    </div>
+    <div class="about-text">
+        <p>
+            Developed by <strong>Faizan</strong><br/>
+            <strong>Email:</strong> <a href="mailto:mianumarzareen@gmail.com">mianumarzareen@gmail.com</a><br/>
+            <strong>GitHub Repo:</strong> <span class="about-link">
+                <a href="https://github.com/u-faizan/NextGen-Resume-Analyzer" target="_blank">
+                    NextGen-Resume-Analyzer
+                </a>
+            </span>
+        </p>
+        <p>
+            Feel free to reach out for any questions, feedback, or collaborations!
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# ===========================
 # User Mode
 # ===========================
 if mode == "User":
