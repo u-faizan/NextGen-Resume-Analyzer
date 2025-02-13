@@ -240,7 +240,7 @@ st.sidebar.markdown(
     }
     /* Body text box styling: light gray background */
     .sidebar-body {
-        background-color: #F2F2F2;
+        background-color: #117864;
         color: #333333;
         padding: 5px 10px;
         border-radius: 4px;
