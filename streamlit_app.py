@@ -462,7 +462,7 @@ if mode == "Admin":
                 st.error("Invalid Admin Credentials")
 
     if st.session_state.admin_logged_in:
-        # Function to load data from the database
+        # Helper function to load data from the database into a DataFrame
         def load_data():
             cursor.execute("SELECT * FROM user_data")
             data = cursor.fetchall()
@@ -471,76 +471,10 @@ if mode == "Admin":
                 columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp']
             )
         
-        # Load current data
+        # 1) Load the data initially
         df = load_data()
         
-        # Display DataFrame
-        st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
-        st.dataframe(df)
-        
-        # === Resume Score Distribution ===
-        st.markdown("<h3 style='color:#15967D;'>Resume Score Distribution</h3>", unsafe_allow_html=True)
-        if df.empty:
-            # If DataFrame is empty, show info message
-            st.info("No data available.")
-        else:
-            # Otherwise, display the bar chart
-            st.bar_chart(df['Resume_Score'])
-        
-        # === Top Skills Overview ===
-        st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
-        
-        def get_top_skills(skill_series, top_n=5):
-            # Filter out NaN values and empty strings
-            skills = [str(s).strip() for s in skill_series if pd.notna(s) and str(s).strip() != ""]
-            if not skills:
-                return pd.Series(dtype=int)
-            # Join all skill entries into one string and split by comma
-            skill_counts = pd.Series(", ".join(skills).split(", ")).value_counts()
-            if len(skill_counts) > top_n:
-                top_skills = skill_counts.head(top_n)
-                top_skills.loc["Others"] = skill_counts[top_n:].sum()
-            else:
-                top_skills = skill_counts
-            return top_skills
-        
-        if df.empty:
-            # If DataFrame is empty, show info message
-            st.info("No data available.")
-        else:
-            # Only generate the pie charts if data is present
-            top_current_skills = get_top_skills(df['Skills'])
-            top_recommended_skills = get_top_skills(df['Recommended_Skills'])
-
-            fig, axes = plt.subplots(1, 2, figsize=(20, 12))
-            plt.subplots_adjust(wspace=0.3)
-
-            def plot_pie(ax, data, title):
-                data.plot.pie(
-                    ax=ax,
-                    autopct='%1.1f%%',
-                    startangle=140,
-                    wedgeprops={'edgecolor': 'white'},
-                    legend=False
-                )
-                ax.set_ylabel('')
-                ax.set_title(title)
-
-            # If top_current_skills is not empty, plot it, otherwise show text
-            if not top_current_skills.empty:
-                plot_pie(axes[0], top_current_skills, "Current Skills")
-            else:
-                axes[0].text(0.5, 0.5, "No Data", ha='center', va='center')
-
-            # If top_recommended_skills is not empty, plot it, otherwise show text
-            if not top_recommended_skills.empty:
-                plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
-            else:
-                axes[1].text(0.5, 0.5, "No Data", ha='center', va='center')
-
-            st.pyplot(fig)
-        
-        # === Manage Data Section ===
+        # 2) Clear data if the button is clicked
         st.markdown("<h3 style='color:#15967D;'>Manage Data</h3>", unsafe_allow_html=True)
         col1, col_gap, col2 = st.columns([1, 0.5, 1])
         with col1:
@@ -551,6 +485,62 @@ if mode == "Admin":
                 cursor.execute("DELETE FROM user_data")
                 conn.commit()
                 st.success("All results have been cleared from the database.")
-                # No need to explicitly rerun; Streamlit will refresh automatically
+                
+                # RELOAD the data right after clearing, so we display an empty DataFrame
+                df = load_data()
+
+        # 3) Now display the data (which might be empty if just cleared)
+        st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
+        st.dataframe(df)
+
+        # 4) Resume Score Distribution
+        st.markdown("<h3 style='color:#15967D;'>Resume Score Distribution</h3>", unsafe_allow_html=True)
+        if df.empty:
+            st.info("No data available.")
+        else:
+            st.bar_chart(df['Resume_Score'])
+        
+        # 5) Top Skills Overview
+        st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
+        def get_top_skills(skill_series, top_n=5):
+            skills = [str(s).strip() for s in skill_series if pd.notna(s) and str(s).strip() != ""]
+            if not skills:
+                return pd.Series(dtype=int)
+            skill_counts = pd.Series(", ".join(skills).split(", ")).value_counts()
+            if len(skill_counts) > top_n:
+                top_skills = skill_counts.head(top_n)
+                top_skills.loc["Others"] = skill_counts[top_n:].sum()
+            else:
+                top_skills = skill_counts
+            return top_skills
+
+        if df.empty:
+            st.info("No data available.")
+        else:
+            top_current_skills = get_top_skills(df['Skills'])
+            top_recommended_skills = get_top_skills(df['Recommended_Skills'])
+            
+            fig, axes = plt.subplots(1, 2, figsize=(20, 12))
+            plt.subplots_adjust(wspace=0.3)
+
+            def plot_pie(ax, data, title):
+                data.plot.pie(
+                    ax=ax, autopct='%1.1f%%', startangle=140,
+                    wedgeprops={'edgecolor': 'white'}, legend=False
+                )
+                ax.set_ylabel('')
+                ax.set_title(title)
+
+            if not top_current_skills.empty:
+                plot_pie(axes[0], top_current_skills, "Current Skills")
+            else:
+                axes[0].text(0.5, 0.5, "No Data", ha='center', va='center')
+
+            if not top_recommended_skills.empty:
+                plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
+            else:
+                axes[1].text(0.5, 0.5, "No Data", ha='center', va='center')
+
+            st.pyplot(fig)
 
 
