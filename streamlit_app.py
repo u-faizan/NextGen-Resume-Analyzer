@@ -58,8 +58,7 @@ def get_top_skills(skill_series, top_n=5):
 # ===========================
 # Database Setup
 # ===========================
-# Connect to (or create) the SQLite database.
-# Note: The table now includes a "feedback" column.
+# Connect to (or create) the SQLite database
 conn = sqlite3.connect('resume_data.db')
 cursor = conn.cursor()
 cursor.execute('''
@@ -71,11 +70,16 @@ cursor.execute('''
         skills TEXT,
         recommended_skills TEXT,
         courses TEXT,
-        feedback TEXT,
         timestamp TEXT
     )
 ''')
 conn.commit()
+# Ensure the "feedback" column exists (for new feedback submissions)
+cursor.execute("PRAGMA table_info(user_data)")
+columns = [row[1] for row in cursor.fetchall()]
+if "feedback" not in columns:
+    cursor.execute("ALTER TABLE user_data ADD COLUMN feedback TEXT")
+    conn.commit()
 
 # ===========================
 # API Configuration & Resume Analysis
@@ -237,37 +241,37 @@ st.sidebar.markdown(
         margin-left: -10px; /* Shift heading slightly left */
         width: calc(100% + 10px);
     }
-    /* Styling for body text: flush left with no extra left padding */
+    /* Styling for body text within colored boxes */
     .sidebar-body {
-        margin: 0;
-        padding-left: 0;
-        padding-right: 0;
-        line-height: 1.4;
+        background-color: #F2F2F2;
+        color: #333333;
+        padding: 5px 10px;
+        border-radius: 4px;
+        margin: 0 0 10px 0;
+        text-align: left;
     }
     </style>
     
     <div class="sidebar-heading">About This App</div>
-    <p class="sidebar-body">
+    <div class="sidebar-body">
         NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure, keyword optimization, and overall effectiveness. Gain insights into how your resume performs against Applicant Tracking Systems (ATS) and discover personalized tips for improvement.
-    </p>
+    </div>
     
-    <br>
     <div class="sidebar-heading">How to Use This App</div>
-    <p class="sidebar-body">
+    <div class="sidebar-body">
         1. <strong>Upload</strong> your resume (PDF format) using the "Upload Your Resume" widget.<br>
         2. <strong>Click</strong> the "Analyze Resume" button after a successful upload.<br>
         3. <strong>Wait</strong> a few seconds for the analysis to complete.<br>
         4. <strong>Explore</strong> your personalized resume feedback, tips, and recommendations!
-    </p>
+    </div>
     
-    <br>
     <div class="sidebar-heading">About the Developer</div>
-    <p class="sidebar-body">
+    <div class="sidebar-body">
         Developed by <strong>Faizan</strong><br>
         <strong>Email:</strong> <a href="mailto:mianumarzareen@gmail.com">mianumarzareen@gmail.com</a><br>
         <strong>GitHub Repo:</strong> <a href="https://github.com/u-faizan/NextGen-Resume-Analyzer" target="_blank">NextGen-Resume-Analyzer</a><br>
         Feel free to reach out for any questions, feedback, or collaborations!
-    </p>
+    </div>
     """,
     unsafe_allow_html=True
 )
@@ -471,6 +475,7 @@ if mode == "User":
         """, unsafe_allow_html=True)
         feedback = st.text_area("Please provide your feedback (optional):", "")
         if st.button("Submit Feedback"):
+            # Insert feedback along with the analysis data into the database.
             cursor.execute('''
                 INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, feedback, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
