@@ -343,7 +343,7 @@ if mode == "User":
             <h3 style="color:white; margin:0;">Appreciation</h3>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Courses suggested to help you enhance your skillset:</p>", unsafe_allow_html=True).</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Positive comments acknowledging your strengths</p>", unsafe_allow_html=True)
         for comment in result.get("appreciation", []):
             st.markdown(f"- {comment}")
         
