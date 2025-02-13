@@ -474,47 +474,51 @@ if mode == "Admin":
         st.bar_chart(df['Resume_Score'])
         
         st.markdown("<h3 style='color:#15967D;'>Top Skills Overview</h3>", unsafe_allow_html=True)
+
         def get_top_skills(skill_series, top_n=5):
-                        skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
-                        if len(skill_counts) > top_n:
-                            top_skills = skill_counts.head(top_n)
-                            top_skills.loc["Others"] = skill_counts[top_n:].sum()  # Group remaining skills as "Others"
-                        else:
-                            top_skills = skill_counts
-                        return top_skills
-                    
-                    # Extracting and grouping skills
-                    top_current_skills = get_top_skills(df['Skills'])
-                    top_recommended_skills = get_top_skills(df['Recommended Skills'])
-                    
-                    # Creating side-by-side columns for proper alignment
-                    col1, col2 = st.columns(2)
-                    
-                    # Plot Pie Chart Function
-                    def plot_pie(ax, data, title):
-                        data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor': 'white'}, legend=False)
-                        ax.set_ylabel('')
-                        ax.set_title(title)
-                    
-                    # Creating subplots to maintain the same figure size
-                    fig, axes = plt.subplots(1, 2, figsize=(16, 8))
-                    
-                    # Plot both charts with the same size
-                    plot_pie(axes[0], top_current_skills, "Current Skills")
-                    plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
-                    
-                    # Display the figure in Streamlit
-                    st.pyplot(fig)
+            skill_counts = pd.Series(", ".join(skill_series).split(", ")).value_counts()
+            if len(skill_counts) > top_n:
+                top_skills = skill_counts.head(top_n)
+                top_skills.loc["Others"] = skill_counts[top_n:].sum()  # Group remaining skills as "Others"
+            else:
+                top_skills = skill_counts
+            return top_skills
+        
+        # Extracting and grouping skills
+        top_current_skills = get_top_skills(df['Skills'])
+        top_recommended_skills = get_top_skills(df['Recommended_Skills'])
+        
+        # Creating side-by-side columns for proper alignment
+        col1, col2 = st.columns(2)
+        
+        # Plot Pie Chart Function
+        def plot_pie(ax, data, title):
+            data.plot.pie(ax=ax, autopct='%1.1f%%', startangle=140, wedgeprops={'edgecolor': 'white'}, legend=False)
+            ax.set_ylabel('')
+            ax.set_title(title)
+        
+        # Creating subplots to maintain the same figure size
+        fig, axes = plt.subplots(1, 2, figsize=(16, 8))
+        
+        # Plot both charts with the same size
+        plot_pie(axes[0], top_current_skills, "Current Skills")
+        plot_pie(axes[1], top_recommended_skills, "Recommended Skills")
+        
+        # Display the figure in Streamlit
+        st.pyplot(fig)
         
         # Manage Data Section: Export and Clear Buttons
         st.markdown("<h3 style='color:#15967D;'>Manage Data</h3>", unsafe_allow_html=True)
         col1, col_gap, col2 = st.columns([1, 0.5, 1])
+        
         with col1:
             export_json = df.to_json(orient="records", indent=4)
             st.download_button("Download All Data as JSON", data=export_json, file_name="user_data.json", mime="application/json")
+        
         with col2:
             if st.button("Clear Results", key="clear_admin"):
                 cursor.execute("DELETE FROM user_data")
                 conn.commit()
                 st.success("All results have been cleared from the database.")
                 st.rerun()  # Forces an immediate refresh
+
