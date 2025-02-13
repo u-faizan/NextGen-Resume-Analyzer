@@ -224,15 +224,12 @@ mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 # ===========================
 # Sidebar: About / How-to / Contact
 # ===========================
-# ===========================
-# Sidebar: About / How-to / Contact
-# ===========================
 st.sidebar.markdown(
     """
     <style>
     /* Styling for prominent headings using a darker shade */
     .sidebar-heading {
-        background-color: #117864; /* Darker shade of teal (#15967D) */
+        background-color: #117864; /* Darker shade than the main teal */
         color: white;
         padding: 5px 10px;
         border-radius: 4px;
@@ -242,11 +239,11 @@ st.sidebar.markdown(
         margin-left: -10px; /* Shift heading slightly left */
         width: calc(100% + 10px);
     }
-    /* Styling for body text with uniform indentation */
+    /* Styling for body text: flush left with no extra left padding */
     .sidebar-body {
         margin: 0;
-        padding-left: 20px;
-        padding-right: 20px;
+        padding-left: 0;
+        padding-right: 0;
         line-height: 1.4;
     }
     </style>
@@ -276,6 +273,7 @@ st.sidebar.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 
 
