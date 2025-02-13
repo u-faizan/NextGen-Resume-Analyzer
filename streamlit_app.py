@@ -236,6 +236,8 @@ st.sidebar.markdown(
         font-size: 1.2em;
         font-weight: bold;
         margin-bottom: 5px;
+        margin-left: -10px; /* Shift heading slightly left */
+        width: calc(100% + 10px);
     }
     </style>
     
