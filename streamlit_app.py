@@ -457,18 +457,22 @@ if mode == "Admin":
             if admin_user == st.secrets["user_name"] and admin_pass == st.secrets["pass"]:
                 st.session_state.admin_logged_in = True
                 st.success("Logged in as Admin")
-                st.experimental_rerun()
+                st.rerun()  # This forces a rerun after successful login.
             else:
                 st.error("Invalid Admin Credentials")
 
     if st.session_state.admin_logged_in:
-        # Fetch data from database
-        cursor.execute("SELECT * FROM user_data")
-        data = cursor.fetchall()
-        df = pd.DataFrame(
-            data,
-            columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp']
-        )
+        # Function to load data from the database
+        def load_data():
+            cursor.execute("SELECT * FROM user_data")
+            data = cursor.fetchall()
+            return pd.DataFrame(
+                data,
+                columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp']
+            )
+        
+        # Load current data
+        df = load_data()
         
         st.markdown("<h3 style='color:#15967D;'>User Data</h3>", unsafe_allow_html=True)
         st.dataframe(df)
@@ -494,7 +498,7 @@ if mode == "Admin":
         top_current_skills = get_top_skills(df['Skills'])
         top_recommended_skills = get_top_skills(df['Recommended_Skills'])
 
-        # Create common figure with increased size and reduced gap
+        # Create a figure with two pie charts
         fig, axes = plt.subplots(1, 2, figsize=(20, 12))
         plt.subplots_adjust(wspace=0.3)
         def plot_pie(ax, data, title):
@@ -522,5 +526,5 @@ if mode == "Admin":
                 cursor.execute("DELETE FROM user_data")
                 conn.commit()
                 st.success("All results have been cleared from the database.")
-                st.experimental_rerun()  # Forces an immediate refresh
+                # No explicit rerun is needed—Streamlit auto-reruns on widget interactions.
 
