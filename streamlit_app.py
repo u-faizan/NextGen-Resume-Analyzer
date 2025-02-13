@@ -227,28 +227,28 @@ mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 st.sidebar.markdown(
     """
     <style>
-    /* Styling for prominent headings */
+    /* Styling for prominent headings using a darker shade */
     .sidebar-heading {
-        background-color: #15967D;
+        background-color: #117864; /* Darker shade of teal (#15967D) */
         color: white;
         padding: 5px 10px;
         border-radius: 4px;
         font-size: 1.2em;
         font-weight: bold;
         margin-bottom: 5px;
-        margin-left: -10px; /* Shift heading slightly left */
+        margin-left: -10px; /* Remove left space */
         width: calc(100% + 10px);
     }
     </style>
     
     <div class="sidebar-heading">About This App</div>
-    <p style="margin: 0;">
+    <p style="margin: 0; text-indent: 20px;">
         NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure, keyword optimization, and overall effectiveness. Gain insights into how your resume performs against Applicant Tracking Systems (ATS) and discover personalized tips for improvement.
     </p>
     
     <br>
     <div class="sidebar-heading">How to Use This App</div>
-    <p style="margin: 0;">
+    <p style="margin: 0; text-indent: 20px;">
         1. <strong>Upload</strong> your resume (PDF format) using the "Upload Your Resume" widget.<br>
         2. <strong>Click</strong> the "Analyze Resume" button after a successful upload.<br>
         3. <strong>Wait</strong> a few seconds for the analysis to complete.<br>
@@ -257,7 +257,7 @@ st.sidebar.markdown(
     
     <br>
     <div class="sidebar-heading">About the Developer</div>
-    <p style="margin: 0;">
+    <p style="margin: 0; text-indent: 20px;">
         Developed by <strong>Faizan</strong><br>
         <strong>Email:</strong> <a href="mailto:mianumarzareen@gmail.com">mianumarzareen@gmail.com</a><br>
         <strong>GitHub Repo:</strong> <a href="https://github.com/u-faizan/NextGen-Resume-Analyzer" target="_blank">NextGen-Resume-Analyzer</a><br>
