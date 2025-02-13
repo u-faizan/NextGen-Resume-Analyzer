@@ -222,26 +222,33 @@ st.markdown(
 mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 
 # ===========================
-# Sidebar: About / Contact Info
+# Sidebar: About / How-To / Contact
 # ===========================
-st.sidebar.markdown("## About This App")
-st.sidebar.write(
-    "NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure, "
-    "keyword optimization, and overall effectiveness. Gain insights into how your resume "
-    "performs against Applicant Tracking Systems (ATS) and discover personalized tips "
-    "for improvement."
+st.sidebar.markdown(
+    """
+    ## **About This App**
+
+    &emsp;NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure, 
+    keyword optimization, and overall effectiveness. Gain insights into how your resume 
+    performs against Applicant Tracking Systems (ATS) and discover personalized tips 
+    for improvement.
+
+    ## **How to Use This App**
+    1. **Upload** your resume (PDF format) using the "Upload Your Resume" widget.
+    2. **Click** the "Analyze Resume" button after a successful upload.
+    3. **Wait** a few seconds for the analysis to complete.
+    4. **Explore** your personalized resume feedback, tips, and recommendations!
+
+    ## **About the Developer**
+
+    Developed by **Faizan**  
+    **Email:** [mianumarzareen@gmail.com](mailto:mianumarzareen@gmail.com)  
+    **GitHub Repo:** [NextGen-Resume-Analyzer](https://github.com/u-faizan/NextGen-Resume-Analyzer)  
+
+    Feel free to reach out for any questions, feedback, or collaborations!
+    """
 )
 
-st.sidebar.markdown("---")
-
-st.sidebar.markdown("## About the Developer")
-st.sidebar.write(
-    "Developed by **Faizan**  \n"
-    "**Email:** [mianumarzareen@gmail.com](mailto:mianumarzareen@gmail.com)  \n"
-    "**GitHub Repo:** [NextGen-Resume-Analyzer]"
-    "(https://github.com/u-faizan/NextGen-Resume-Analyzer)  \n\n"
-    "Feel free to reach out for any questions, feedback, or collaborations!"
-)
 
 
 # ===========================
