@@ -327,7 +327,7 @@ if mode == "User":
             <h3 style="color:white; margin:0;">Recommended Courses</h3>
         </div>
         """, unsafe_allow_html=True)
-        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Courses suggested to help you enhance your skillset:.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Courses suggested to help you enhance your skillset:</p>", unsafe_allow_html=True)
         for course in result.get("course_recommendations", []):
             if isinstance(course, dict):
                 platform = course.get("platform", "Unknown Platform")
@@ -343,7 +343,7 @@ if mode == "User":
             <h3 style="color:white; margin:0;">Appreciation</h3>
         </div>
         """, unsafe_allow_html=True)
-        st.write("Positive comments acknowledging your strengths:")
+        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Courses suggested to help you enhance your skillset:</p>", unsafe_allow_html=True).</p>", unsafe_allow_html=True)
         for comment in result.get("appreciation", []):
             st.markdown(f"- {comment}")
         
@@ -353,7 +353,7 @@ if mode == "User":
             <h3 style="color:white; margin:0;">Resume Tips</h3>
         </div>
         """, unsafe_allow_html=True)
-        st.write("Constructive suggestions for improving your resume:")
+        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Constructive suggestions for improving your resume:</p>", unsafe_allow_html=True)
         for tip in result.get("resume_tips", []):
             st.markdown(f"- {tip}")
         
@@ -363,7 +363,7 @@ if mode == "User":
             <h3 style="color:white; margin:0;">Matching Job Roles</h3>
         </div>
         """, unsafe_allow_html=True)
-        st.write("Job roles that match your skills and experience:")
+        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Job roles that match your skills and experience:</p>", unsafe_allow_html=True)
         for role in result.get("matching_job_roles", []):
             st.markdown(f"- {role}")
         
@@ -373,7 +373,7 @@ if mode == "User":
             <h3 style="color:white; margin:0;">ATS Keywords</h3>
         </div>
         """, unsafe_allow_html=True)
-        st.write("Industry-relevant keywords for better ATS performance:")
+        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Industry-relevant keywords for better ATS performance:</p>", unsafe_allow_html=True)
         ats_keywords = result.get("ats_keywords", [])
         if isinstance(ats_keywords, list):
             for keyword in ats_keywords:
@@ -400,7 +400,7 @@ if mode == "User":
             <h3 style="color:white; margin:0;">Resume Writing Tips</h3>
         </div>
         """, unsafe_allow_html=True)
-        st.write("Check out these high-rated YouTube videos for expert resume writing tips:")
+        st.markdown("<p style='font-size:16px; font-style:italic; color:#555555;'>Check out these high-rated YouTube videos for expert resume writing tips:</p>", unsafe_allow_html=True)
         col_video1, col_video2 = st.columns(2)
         with col_video1:
             st.video("https://youtu.be/Tt08KmFfIYQ?si=mU-0_Mcoq8SO_2qt")
