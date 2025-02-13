@@ -227,56 +227,55 @@ mode = st.sidebar.selectbox("Select Mode", ["User", "Admin"])
 st.sidebar.markdown(
     """
     <style>
-    .about-section {
-        background-color: #15967D;
+    /* Container styling */
+    .sidebar-container {
+        background-color: #DCEEEE; /* Light shade complementing #15967D */
         padding: 15px;
         border-radius: 5px;
         margin-bottom: 20px;
     }
-    .about-title {
-        color: white;
+    /* Headings inside the container */
+    .sidebar-heading {
+        font-size: 1.1em;
         margin: 0;
-        font-size: 1.2em;
+        color: #15967D; /* Matches the brand color */
     }
-    .about-text {
-        background-color: #F5F5F5;
-        padding: 15px;
-        border-radius: 5px;
-        margin-top: 10px;
-        color: #333333;
+    /* Body text styling */
+    .sidebar-text {
+        color: #333333; /* Dark text for contrast */
         font-size: 0.9em;
+        line-height: 1.4;
+        margin-top: 8px;
     }
-    .about-link a {
-        color: #15967D;
+    /* Link styling */
+    .sidebar-text a {
+        color: #15967D; /* Match brand color for links */
         text-decoration: none;
         font-weight: bold;
     }
     </style>
-    <div class="about-section">
-        <h3 class="about-title">About This App</h3>
-    </div>
-    <div class="about-text">
-        <p>
-            NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure, 
-            keyword optimization, and overall effectiveness. Gain insights into how your resume 
-            performs against Applicant Tracking Systems (ATS) and discover personalized tips 
+
+    <div class="sidebar-container">
+        <h3 class="sidebar-heading">About This App</h3>
+        <p class="sidebar-text">
+            NextGen Resume Analyzer is a powerful tool to help you analyze your resume's structure,
+            keyword optimization, and overall effectiveness. Gain insights into how your resume
+            performs against Applicant Tracking Systems (ATS) and discover personalized tips
             for improvement.
         </p>
     </div>
-    <div class="about-section">
-        <h3 class="about-title">About the Developer</h3>
-    </div>
-    <div class="about-text">
-        <p>
+
+    <div class="sidebar-container">
+        <h3 class="sidebar-heading">About the Developer</h3>
+        <p class="sidebar-text">
             Developed by <strong>Faizan</strong><br/>
-            <strong>Email:</strong> <a href="mailto:mianumarzareen@gmail.com">mianumarzareen@gmail.com</a><br/>
-            <strong>GitHub Repo:</strong> <span class="about-link">
-                <a href="https://github.com/u-faizan/NextGen-Resume-Analyzer" target="_blank">
-                    NextGen-Resume-Analyzer
-                </a>
-            </span>
-        </p>
-        <p>
+            <strong>Email:</strong> 
+            <a href="mailto:mianumarzareen@gmail.com">mianumarzareen@gmail.com</a><br/>
+            <strong>GitHub Repo:</strong> 
+            <a href="https://github.com/u-faizan/NextGen-Resume-Analyzer" target="_blank">
+                NextGen-Resume-Analyzer
+            </a>
+            <br/><br/>
             Feel free to reach out for any questions, feedback, or collaborations!
         </p>
     </div>
