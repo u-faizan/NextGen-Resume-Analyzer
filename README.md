@@ -144,8 +144,7 @@ The **NextGen Resume Analyzer** is an essential tool for anyone looking to enhan
 
 
 
----
-                              
+                          
 ## Demo App
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://NextGen-Resume-Analyzer.streamlit.app/)
@@ -153,6 +152,17 @@ The **NextGen Resume Analyzer** is an essential tool for anyone looking to enhan
 ## GitHub Codespaces
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://NextGen-Resume-Analyzer/streamlit/app-starter-kit?quickstart=1)
-```
+
+<div align="center">
+  <h2>Demo App</h2>
+  <a href="https://NextGen-Resume-Analyzer.streamlit.app/">
+    <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Streamlit App">
+  </a>
+
+  <h2>GitHub Codespaces</h2>
+  <a href="https://NextGen-Resume-Analyzer/streamlit/app-starter-kit?quickstart=1">
+    <img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces">
+  </a>
+</div>
 
                                        
