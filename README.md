@@ -136,8 +136,11 @@ Python: The core programming language used throughout the project.
 
 ## Developer Information
 Developed by Umar Faizan
+
 linkdin : https://www.linkedin.com/in/u-faizan/
+
 Email: mianumarzareen@gmail.com
+
 GitHub Repository: https://github.com/u-faizan
 
 Feel free to reach out with any questions, feedback, or collaboration opportunities.
