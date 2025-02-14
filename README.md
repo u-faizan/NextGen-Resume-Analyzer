@@ -123,15 +123,22 @@ View all user records, download the complete dataset as JSON, clear records, and
 
 # Technology Stack
 Streamlit: For building the interactive web application.
+
 SQLite: For storing user data and feedback.
+
 PDFMiner: For extracting text from PDF resumes.
+
 Pandas & Matplotlib: For data processing and visualization.
+
 Requests: For API communication.
+
 Python: The core programming language used throughout the project.
-Developer Information
+
+## Developer Information
 Developed by Umar Faizan
+linkdin : https://www.linkedin.com/in/u-faizan/
 Email: mianumarzareen@gmail.com
-GitHub Repository: NextGen-Resume-Analyzer
+GitHub Repository: https://github.com/u-faizan
 
 Feel free to reach out with any questions, feedback, or collaboration opportunities.
 
