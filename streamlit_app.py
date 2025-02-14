@@ -483,17 +483,31 @@ if mode == "User":
             st.session_state.record_saved = True
             st.session_state.record_id = cursor.lastrowid
         
-        # --- Feedback Section ---
-        st.markdown("""
-        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-            <h3 style="color:white; margin:0;">Feedback</h3>
-        </div>
-        """, unsafe_allow_html=True)
-        feedback = st.text_area("Please provide your feedback (optional):", "")
-        if st.button("Submit Feedback"):
-            cursor.execute("UPDATE user_data SET feedback=? WHERE id=?", (feedback, st.session_state.record_id))
-            conn.commit()
-            st.success("Feedback submitted! Thank you.")
+            # --- Feedback Section ---
+            st.markdown("""
+            <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+                <h3 style="color:white; margin:0;">Feedback</h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # If "feedback_submitted" is not in session state, initialize it to False
+            if "feedback_submitted" not in st.session_state:
+                st.session_state.feedback_submitted = False
+            
+            # If user has not yet submitted feedback, show the text area and button
+            if not st.session_state.feedback_submitted:
+                feedback = st.text_area("Please provide your feedback (optional):", "")
+                if st.button("Submit Feedback"):
+                    # Update the existing record with the new feedback
+                    cursor.execute("UPDATE user_data SET feedback=? WHERE id=?", (feedback, st.session_state.record_id))
+                    conn.commit()
+                    st.success("Feedback submitted! Thank you.")
+                    # Mark that feedback has been submitted to prevent overwriting
+                    st.session_state.feedback_submitted = True
+            else:
+                # If feedback was already submitted, just show a message
+                st.info("You have already submitted your feedback. Thank you!")
+
 
 
         
