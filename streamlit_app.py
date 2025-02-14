@@ -70,16 +70,12 @@ cursor.execute('''
         skills TEXT,
         recommended_skills TEXT,
         courses TEXT,
-        timestamp TEXT
+        timestamp TEXT,
+        feedback TEXT
     )
 ''')
 conn.commit()
-# Ensure the "feedback" column exists; if not, add it.
-cursor.execute("PRAGMA table_info(user_data)")
-columns = [row[1] for row in cursor.fetchall()]
-if "feedback" not in columns:
-    cursor.execute("ALTER TABLE user_data ADD COLUMN feedback TEXT")
-    conn.commit()
+
 
 # ===========================
 # API Configuration & Resume Analysis
@@ -553,7 +549,7 @@ if mode == "Admin":
             # Updated columns list includes "Feedback"
             return pd.DataFrame(
                 data,
-                columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Feedback', 'Timestamp']
+                columns=['ID', 'Name', 'Email', 'Resume_Score', 'Skills', 'Recommended_Skills', 'Courses', 'Timestamp','Feedback']
             )
         
         # 1) Load the data initially
