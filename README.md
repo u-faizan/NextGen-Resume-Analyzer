@@ -154,4 +154,5 @@ The **NextGen Resume Analyzer** is an essential tool for anyone looking to enhan
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://NextGen-Resume-Analyzer/streamlit/app-starter-kit?quickstart=1)
 
+
                                        
