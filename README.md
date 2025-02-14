@@ -228,11 +228,6 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
     ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/68a79898a92fca42f34994f1aa281511bf21d0bb/screenshots/admin/5.png)
     ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/68a79898a92fca42f34994f1aa281511bf21d0bb/screenshots/admin/6.png)
 
-<details>
-<summary>Sample Screenshot</summary>
-<img src="https://via.placeholder.com/1200x600?text=NextGen+Resume+Analyzer+User+Mode" alt="Sample Screenshot">
-</details>
-
 ---
 
 ## Demo App
