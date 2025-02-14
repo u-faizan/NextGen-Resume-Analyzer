@@ -246,13 +246,6 @@ The **NextGen Resume Analyzer** is an essential tool for anyone seeking to **opt
 **Try it out today and give your resume the edge it needs!**  
 
 _Keywords: Resume Analyzer, ATS Optimization, AI Resume Analysis, Resume Tips, Job Matching, Resume Feedback, AI Career Recommendations, PDF Resume Analysis, Professional Development, Resume Skills, Resume Score, NextGen Resume Tool._                    
-## Demo App
-
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://NextGen-Resume-Analyzer.streamlit.app/)
-
-## GitHub Codespaces
-
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://NextGen-Resume-Analyzer/streamlit/app-starter-kit?quickstart=1)
 
 
                                        
