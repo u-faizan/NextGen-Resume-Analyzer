@@ -509,8 +509,10 @@ if mode == "User":
             # Ensure final_feedback is defined for use in the export section.
             final_feedback = st.session_state.get("final_feedback", "")
 
-
-
+        # Ensure final_feedback is defined (defaults to an empty string)
+        if "final_feedback" not in st.session_state:
+            st.session_state.final_feedback = ""
+        final_feedback = st.session_state.final_feedback
 
         
         # --- Export Results Section (Single Instance) ---
