@@ -490,23 +490,27 @@ if mode == "User":
             </div>
             """, unsafe_allow_html=True)
             
-            # If "feedback_submitted" is not in session state, initialize it to False
+            # Initialize feedback submission flag if not already set.
             if "feedback_submitted" not in st.session_state:
                 st.session_state.feedback_submitted = False
             
-            # If user has not yet submitted feedback, show the text area and button
+            # If the user hasn't submitted feedback yet, show the text area and button.
             if not st.session_state.feedback_submitted:
-                feedback = st.text_area("Please provide your feedback (optional):", "")
+                feedback_input = st.text_area("Please provide your feedback (optional):", "")
                 if st.button("Submit Feedback"):
-                    # Update the existing record with the new feedback
-                    cursor.execute("UPDATE user_data SET feedback=? WHERE id=?", (feedback, st.session_state.record_id))
+                    # Update the saved record with the feedback.
+                    cursor.execute("UPDATE user_data SET feedback=? WHERE id=?", (feedback_input, st.session_state.record_id))
                     conn.commit()
-                    st.success("Feedback submitted! Thank you.")
-                    # Mark that feedback has been submitted to prevent overwriting
                     st.session_state.feedback_submitted = True
+                    # Save the feedback in session_state for later use.
+                    st.session_state.final_feedback = feedback_input
+                    st.success("Feedback submitted! Thank you.")
             else:
-                # If feedback was already submitted, just show a message
                 st.info("You have already submitted your feedback. Thank you!")
+            
+            # Ensure a final_feedback variable is available for export (defaults to empty string).
+            final_feedback = st.session_state.get("final_feedback", "")
+
 
 
 
