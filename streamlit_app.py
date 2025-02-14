@@ -477,7 +477,7 @@ if mode == "User":
                 ", ".join(result.get("skills", {}).get("recommended_skills", [])),
                 ", ".join([course.get("course_name", "Null") if isinstance(course, dict) else str(course)
                            for course in result.get("course_recommendations", [])]),
-                ""  # Save feedback as empty if none provided
+                ""  # Feedback is initially empty
             ))
             conn.commit()
             st.session_state.record_saved = True
@@ -490,25 +490,23 @@ if mode == "User":
             </div>
             """, unsafe_allow_html=True)
             
-            # Initialize feedback submission flag if not already set.
+            # Initialize the feedback submission flag if not already set.
             if "feedback_submitted" not in st.session_state:
                 st.session_state.feedback_submitted = False
             
-            # If the user hasn't submitted feedback yet, show the text area and button.
+            # Only allow feedback submission if not already submitted.
             if not st.session_state.feedback_submitted:
                 feedback_input = st.text_area("Please provide your feedback (optional):", "")
                 if st.button("Submit Feedback"):
-                    # Update the saved record with the feedback.
                     cursor.execute("UPDATE user_data SET feedback=? WHERE id=?", (feedback_input, st.session_state.record_id))
                     conn.commit()
                     st.session_state.feedback_submitted = True
-                    # Save the feedback in session_state for later use.
                     st.session_state.final_feedback = feedback_input
                     st.success("Feedback submitted! Thank you.")
             else:
                 st.info("You have already submitted your feedback. Thank you!")
             
-            # Ensure a final_feedback variable is available for export (defaults to empty string).
+            # Ensure final_feedback is defined for use in the export section.
             final_feedback = st.session_state.get("final_feedback", "")
 
 
