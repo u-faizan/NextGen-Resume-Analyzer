@@ -88,7 +88,7 @@ def get_resume_analysis(resume_text):
     Sends resume text to the API and returns the analysis result.
     """
     prompt = f"""
-You are an expert resume analyzer. Extract and output the following information strictly in JSON format. Do not include any explanations, comments, or additional text outside the JSON block.
+You are an expert resume analyzer. You must produce valid JSON output and ensure all URLs are valid and relevant to the recommended courses. Additionally, you must tailor job roles to the candidate’s experience level. For example, if the resume indicates an entry-level or student background, include junior- or intern-level job roles (e.g., 'Data Science Intern', 'Junior Data Scientist', 'Machine Learning Intern') rather than exclusively senior positions.
 
 Evaluation Criteria for Resume Score:
 - Formatting and structure (clear sections, bullet points)
@@ -113,13 +113,13 @@ Return the JSON structure as follows:
     {{
         "platform": string,
         "course_name": string,
-        "link": valid URL
+        "link": valid URL (ensure this is an active, relevant course URL)
     }},
     "appreciation": list of at least 5 personalized positive comments,
     "resume_tips": list of at least 5 suggestions for improvement,
     "resume_score": string (score in "XX/100" format),
     "ai_resume_summary": string (a concise summary for ATS optimization),
-    "matching_job_roles": list of 2-3 job roles,
+    "matching_job_roles": list of 2-3 job roles specifically relevant to the candidate’s experience level,
     "ats_keywords": list of at least 5 industry-relevant keywords,
     "project_suggestions": {{
         "improvement_tips": list of 2-3 tips to enhance existing projects,
@@ -132,6 +132,8 @@ Ensure the JSON is valid before outputting.
 Here is the resume text:
 \"\"\"{resume_text}\"\"\"
 """
+
+
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
