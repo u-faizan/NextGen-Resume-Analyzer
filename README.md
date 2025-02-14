@@ -83,49 +83,45 @@ NextGen Resume Analyzer automates the process of resume evaluation. By simply up
    ```bash
    git clone https://github.com/u-faizan/NextGen-Resume-Analyzer.git
    cd NextGen-Resume-Analyzer
-Install Dependencies:
-
+   
+## Install Dependencies:
 bash
-Copy
-Edit
 pip install -r requirements.txt
-Configure Your API Key:
 
+## Configure Your API Key:
 Create a secrets.toml file (or use your deployment platform’s secret management) with the following:
 
 toml
-Copy
-Edit
 [API_KEY]
 API_KEY = "your_api_key_here"
-Run the Application:
 
+
+## Run the Application:
 bash
-Copy
-Edit
 streamlit run streamlit_app.py
 Usage
 User Mode
-Upload Resume:
+
+## Upload Resume:
 Use the "Upload Your Resume" widget to select your PDF resume.
 
-Analyze Resume:
+## Analyze Resume:
 Click "Analyze Resume" to generate the analysis. The app displays your resume score, AI-generated summary, detailed skills analysis (both current and recommended), course suggestions, and more.
 
-Submit Feedback:
+## Submit Feedback:
 Enter your feedback (if any) in the provided text area. Once you click "Submit Feedback," the feedback is saved with your record and cannot be changed during the session.
 
-Export Data:
+## Export Data:
 Download your complete analysis and feedback as a JSON file for future reference.
 
-Admin Mode
-Log In:
+# Admin Mode
+## Log In:
 Switch to Admin Mode using the mode selector and log in with your admin credentials.
 
-Manage Data:
+## Manage Data:
 View all user records, download the complete dataset as JSON, clear records, and review visualizations such as resume score distribution and skills overview.
 
-Technology Stack
+# Technology Stack
 Streamlit: For building the interactive web application.
 SQLite: For storing user data and feedback.
 PDFMiner: For extracting text from PDF resumes.
@@ -139,10 +135,10 @@ GitHub Repository: NextGen-Resume-Analyzer
 
 Feel free to reach out with any questions, feedback, or collaboration opportunities.
 
-License
+## License
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-Acknowledgments
+## Acknowledgments
 Special thanks to the developers of Streamlit, PDFMiner, and other open-source libraries that made this project possible.
 Appreciation to the open-source community for continuous support and valuable resources.
 
@@ -155,6 +151,6 @@ Appreciation to the open-source community for continuous support and valuable re
 
 ## GitHub Codespaces
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/app-starter-kit?quickstart=1)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://NextGen-Resume-Analyzer/streamlit/app-starter-kit?quickstart=1)
 
                                        
