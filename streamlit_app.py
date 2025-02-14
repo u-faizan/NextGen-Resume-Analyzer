@@ -473,9 +473,15 @@ if mode == "User":
             <h3 style="color:white; margin:0;">Feedback</h3>
         </div>
         """, unsafe_allow_html=True)
+        # --- Feedback & Save Analysis Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Feedback & Save Analysis</h3>
+        </div>
+        """, unsafe_allow_html=True)
         feedback = st.text_area("Please provide your feedback (optional):", "")
-        if st.button("Submit Feedback"):
-            # Insert feedback along with the analysis data into the database.
+        
+        if st.button("Save Analysis"):
             cursor.execute('''
                 INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, feedback, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
@@ -487,10 +493,11 @@ if mode == "User":
                 ", ".join(result.get("skills", {}).get("recommended_skills", [])),
                 ", ".join([course.get("course_name", "Null") if isinstance(course, dict) else str(course)
                            for course in result.get("course_recommendations", [])]),
-                feedback
+                feedback  # This can be an empty string if no feedback is given.
             ))
             conn.commit()
-            st.success("Feedback submitted! Thank you.")
+            st.success("Analysis saved! Thank you.")
+
         
         # --- Export Results Section (Single Instance) ---
         st.markdown("<h3 style='color:#15967D;'>Export Your Details</h3>", unsafe_allow_html=True)
