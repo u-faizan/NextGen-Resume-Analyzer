@@ -212,7 +212,21 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
    ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/2.png)
    ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/3.png)
    ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/4.png)
+   ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/5.png)
+   ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/6.png)
+   ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/7.png)
+   ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/8.png)
+   ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/9.png)
+   ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/10.png)
+   ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/11.png)
+   
 3. **Admin Mode** – User Data Dashboard, Resume Score Distribution, and Skills Overview
+   ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/68a79898a92fca42f34994f1aa281511bf21d0bb/screenshots/admin/1.png)
+    ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/68a79898a92fca42f34994f1aa281511bf21d0bb/screenshots/admin/2.png)
+    ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/68a79898a92fca42f34994f1aa281511bf21d0bb/screenshots/admin/3.png)
+    ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/68a79898a92fca42f34994f1aa281511bf21d0bb/screenshots/admin/4.png)
+    ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/68a79898a92fca42f34994f1aa281511bf21d0bb/screenshots/admin/5.png)
+    ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/68a79898a92fca42f34994f1aa281511bf21d0bb/screenshots/admin/6.png)
 
 <details>
 <summary>Sample Screenshot</summary>
