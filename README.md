@@ -1,150 +1,251 @@
- # NextGen Resume Analyzer 📝 - AI-Powered Resume Evaluation Tool
-```markdown
+
+---
+
 # NextGen Resume Analyzer 📝 - AI-Powered Resume Evaluation Tool
 
+The **NextGen Resume Analyzer** is a cutting-edge, **AI-driven** web application designed to help job seekers and professionals optimize their resumes for better visibility and success in a competitive job market. Built using **Streamlit** and leveraging **OpenAI** technology, this tool evaluates resumes against **Applicant Tracking Systems (ATS)** standards and provides actionable insights to enhance structure, keyword optimization, and overall content quality.
+
+## Table of Contents
+1. [Overview](#overview)  
+2. [Key Features](#key-features)  
+3. [Tech Stack](#tech-stack)  
+4. [Getting Started](#getting-started)  
+   - [Prerequisites](#prerequisites)  
+   - [Installation Steps](#installation-steps)  
+   - [Running the Application](#running-the-application)  
+5. [Usage](#usage)  
+   - [For Users](#for-users)  
+   - [For Admins](#for-admins)  
+6. [Customization](#customization)  
+7. [Contributing](#contributing)  
+8. [License](#license)  
+9. [Developer Information](#developer-information)  
+10. [Contact and Support](#contact-and-support)  
+11. [Screenshots](#screenshots)  
+12. [Demo App](#demo-app)  
+13. [GitHub Codespaces](#github-codespaces)  
+14. [Conclusion](#conclusion)
+
+---
+
 ## Overview
-The **NextGen Resume Analyzer** is a cutting-edge AI-driven web application designed to help job seekers and professionals optimize their resumes for better visibility and performance in the competitive job market. Built using **Streamlit** and leveraging the power of **OpenAI's GPT models**, this tool analyzes resumes against **Applicant Tracking Systems (ATS)** and provides actionable insights to enhance their structure, keyword optimization, and content quality.
 
-By simply uploading a **PDF resume**, users can receive a comprehensive report that includes:
-- **Resume Score** based on ATS optimization.
-- **Personalized Recommendations** for skills and courses.
-- **Resume Improvement Tips** tailored to your content.
-- **Matching Job Roles** that align with your skills and experiences.
-- **ATS Keywords** that improve your resume's chances of passing automated scans.
-- **Suggested Projects** to enhance your portfolio.
+The **NextGen Resume Analyzer** simplifies the process of **resume evaluation** by automatically extracting essential data from a PDF resume and measuring how well it meets **ATS** requirements. In just a few clicks, users receive a comprehensive report, including:
 
-### Key Features
-- **AI-Powered Resume Analysis**: The tool provides an AI-based analysis that evaluates your resume against multiple criteria, including formatting, ATS optimization, content quality, and readability.
-- **Resume Upload & PDF Parsing**: Users can upload their resumes in **PDF format**, and the tool extracts and processes text to provide a detailed evaluation.
-- **Personalized Recommendations**: Based on your resume, the tool suggests new skills, courses, and job roles that align with your professional goals.
-- **ATS Optimization**: The app checks your resume for important **industry-relevant keywords** to ensure it is optimized for ATS.
-- **Detailed Feedback & Tips**: Receive targeted feedback on how to improve the clarity, structure, and relevance of your resume.
-- **Job Role Matching**: Discover roles that match your current skillset and career trajectory.
-- **Project Suggestions**: Get ideas for personal or professional projects to add to your resume to showcase your abilities.
-- **Downloadable Resume Analysis**: Export your resume analysis as a **JSON file** for further reference or sharing.
+- **Resume Score** (based on ATS compatibility, clarity, and relevance)  
+- **Personalized Recommendations** for new skills, courses, and projects  
+- **Matching Job Roles** aligned with existing skill sets  
+- **Feedback and Resume Improvement Tips**  
+- **Industry-Relevant ATS Keywords** to enhance searchability  
+
+Whether you’re a **job seeker**, a **career coach**, or an **HR professional**, NextGen Resume Analyzer streamlines resume reviews, saving time and boosting your chances of standing out in today’s job market.
+
+---
+
+## Key Features
+
+1. **AI-Powered Resume Analysis**  
+   Utilizes **OpenAI** technology to evaluate resumes on formatting, keyword usage, and overall presentation.
+
+2. **PDF Resume Parsing**  
+   Easily upload a **PDF** version of your resume; the application extracts and processes the text automatically.
+
+3. **Comprehensive Feedback**  
+   Offers detailed tips on **formatting**, **content improvement**, and **keyword enrichment** to ensure ATS optimization.
+
+4. **Skill & Course Recommendations**  
+   Suggests additional skills to acquire, plus **course recommendations** to further enhance your professional profile.
+
+5. **Job Role Matching**  
+   Identifies suitable job roles based on your existing and recommended skills.
+
+6. **Project Suggestions**  
+   Provides ideas for personal or professional projects to bolster your resume portfolio.
+
+7. **Downloadable Analysis**  
+   Export your analysis (including feedback) as a **JSON** file for reference or sharing.
+
+8. **User & Admin Dashboards**  
+   - **User Mode**: Upload, analyze, and download your resume analysis.  
+   - **Admin Mode**: Manage user data, visualize resume scores, and download comprehensive reports.
+
+---
 
 ## Tech Stack
-- **Frontend**: Built with **Streamlit** to provide an interactive and user-friendly experience.
-- **Backend**: Uses **SQLite** for data storage and management.
-- **AI Model**: Powered by **OpenAI API**, specifically fine-tuned GPT models for precise resume analysis.
-- **PDF Parsing**: **PDFMiner** for extracting text from PDF files to be analyzed.
-- **Data Processing**: **Pandas** for managing and processing data, ensuring accurate skill counts and recommendations.
-- **Data Visualization**: **Matplotlib** for generating visual reports, such as **resume score distribution** and skill breakdowns.
+
+- **Frontend**: [Streamlit](https://streamlit.io/) for an interactive and user-friendly UI.  
+- **Backend**: [SQLite](https://www.sqlite.org/index.html) for lightweight data storage.  
+- **AI Model**: Powered by [OpenAI](https://openai.com/) (e.g., GPT models) for precise resume analysis.  
+- **PDF Parsing**: [PDFMiner](https://github.com/pdfminer/pdfminer.six) for extracting text from PDF documents.  
+- **Data Processing**: [Pandas](https://pandas.pydata.org/) for data management, [Matplotlib](https://matplotlib.org/) for visualizations.  
+- **Python**: Core programming language tying it all together.
+
+---
 
 ## Getting Started
 
 ### Prerequisites
-Ensure you have the following prerequisites:
-- **Python 3.7+**
-- **Streamlit**: Install via `pip install streamlit`
-- **Pillow**: For handling image uploads, `pip install Pillow`
-- **Requests**: To send HTTP requests, `pip install requests`
-- **PDFMiner**: For PDF text extraction, `pip install pdfminer.six`
-- **SQLite**: SQLite comes pre-installed with Python, so no extra installation is required.
+
+- **Python 3.7+**  
+- **pip** (Python package manager)
 
 ### Installation Steps
-1. **Clone the Repository:**
+
+1. **Clone the Repository**  
    ```bash
    git clone https://github.com/u-faizan/nextgen-resume-analyzer.git
    cd nextgen-resume-analyzer
    ```
 
-2. **Install Required Dependencies:**
+2. **Install Required Dependencies**  
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Set up API Key:**
-   - Obtain an API key from **OpenAI**: [Sign up for OpenAI](https://platform.openai.com/).
-   - Create a **secrets.toml** file in the `.streamlit` folder and add your API key:
-     ```toml
-     [API_KEY]
-     api_key = "your_openai_api_key"
-     ```
+3. **Set up API Key**  
+   1. Sign up for an API key from [OpenAI](https://openai.com/).  
+   2. Create a `secrets.toml` file in the `.streamlit` folder (or configure via your deployment platform) and add your API key:
+      ```toml
+      [API_KEY]
+      api_key = "your_openai_api_key"
+      ```
 
-4. **Run the Application:**
+### Running the Application
+
+1. **Run the Streamlit App**  
    ```bash
    streamlit run app.py
    ```
-
-5. **Open the App in Your Browser**: Navigate to `http://localhost:8501` to start using the tool.
-
-### User Interface
-The application provides two modes:
-- **User Mode**: Allows individuals to upload their resume, get feedback, and download the analysis.
-- **Admin Mode**: Provides admins with the ability to manage user data, view resume statistics, and download reports.
-
-## How to Use the NextGen Resume Analyzer
-
-### For Users:
-1. **Upload Your Resume**: Click on the "Upload Your Resume (PDF)" button to select your resume file.
-2. **Analyze Resume**: After uploading, click the "Analyze Resume" button to process your resume.
-3. **View Results**: Once the analysis is complete, the app will display:
-   - A **Resume Score** (based on ATS optimization, formatting, clarity, and content relevance).
-   - A breakdown of **Current and Recommended Skills**.
-   - A **Summary of Skills** and **ATS Keywords** that are relevant for your industry.
-   - **Job Roles** that align with your skillset.
-   - **Suggested Courses** and **Project Ideas** for professional development.
-4. **Download Analysis**: You can download the analysis as a **JSON file** for future reference or sharing.
-
-### For Admins:
-- **Login**: Admins can log in using a username and password (stored securely in **Streamlit secrets**).
-- **View User Data**: Admins can view and download a full list of user data.
-- **Manage Database**: Admins can clear user data from the database or download the entire dataset as a JSON file.
-- **Visual Analytics**: Admins can view visualizations such as **Resume Score Distribution** and the most frequent skills across resumes.
-
-## Customization
-
-- **API Integration**: You can modify the API integration and change the prompts or models used for resume analysis. This is handled in the `get_resume_analysis` function.
-- **Database**: The app uses **SQLite** for storing user data, but you can switch to other database engines (e.g., PostgreSQL or MySQL) if needed.
-- **UI Styling**: Modify the Streamlit layout or add custom CSS to personalize the app's look and feel.
-
-## Contributing
-We welcome contributions! If you'd like to contribute to this project, follow these steps:
-1. Fork the repository.
-2. Clone your forked repository to your local machine.
-3. Create a new branch for your changes.
-4. Make your changes and test them.
-5. Submit a pull request with a detailed explanation of the changes you’ve made.
-
-Please adhere to the project's coding standards and guidelines when contributing. Thank you for helping improve **NextGen Resume Analyzer**!
-
-## License
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-## Developer Information
-**Developed by [Umar Faizan](https://www.linkedin.com/in/u-faizan/)**  
-**GitHub**: [u-faizan](https://github.com/u-faizan)  
-**Email**: [mianumarzareen@gmail.com](mailto:mianumarzareen@gmail.com)  
-Feel free to reach out with any questions, feedback, or collaboration opportunities.
+2. **Open the App**  
+   Navigate to [http://localhost:8501](http://localhost:8501) in your browser to access the NextGen Resume Analyzer.
 
 ---
 
-### Contact and Support:
-- If you encounter any issues, feel free to contact me via email or reach out on **LinkedIn**.
-- For project collaborations, feature requests, or bug reports, please open an issue in the GitHub repository.
+## Usage
+
+### For Users
+
+1. **Upload Your Resume**  
+   Click on the "**Upload Your Resume (PDF)**" button to select your resume file.
+
+2. **Analyze Resume**  
+   After uploading, click "**Analyze Resume**" to process your resume. The tool displays:
+   - **Resume Score**  
+   - **AI-Generated Summary**  
+   - **Current & Recommended Skills**  
+   - **Matching Job Roles**  
+   - **Course Suggestions**  
+   - **Project Ideas**  
+   - **ATS Keywords**
+
+3. **Submit Feedback**  
+   Provide feedback on your analysis. Once submitted, it is saved and **cannot be overridden** within the same session.
+
+4. **Download Analysis**  
+   Export the entire analysis as a **JSON** file for future reference or sharing.
+
+### For Admins
+
+1. **Login**  
+   Switch to **Admin Mode** and enter your admin credentials.
+
+2. **View User Data**  
+   Access all user submissions, including resume scores and feedback.
+
+3. **Manage Database**  
+   - **Download** the entire dataset as JSON.  
+   - **Clear** all user data from the database if needed.
+
+4. **Visual Analytics**  
+   - **Resume Score Distribution**  
+   - **Most Frequent Skills**  
+   - **Recommended Skills** Overview
+
+---
+
+## Customization
+
+- **AI Integration**: Modify the API prompts or switch to a different model in the `get_resume_analysis` function.  
+- **Database**: Although the app uses SQLite by default, you can switch to another database engine (e.g., PostgreSQL) if preferred.  
+- **UI & Styling**: Adjust the Streamlit layout or add custom CSS for a unique look and feel.
+
+---
+
+## Contributing
+
+We welcome contributions to improve the NextGen Resume Analyzer. To contribute:
+
+1. **Fork the Repository**  
+2. **Create a New Branch** for your changes  
+3. **Test** your modifications thoroughly  
+4. **Submit a Pull Request** with a clear description of your updates
+
+Please adhere to any coding standards and guidelines mentioned in this repository. Thank you for helping us improve NextGen Resume Analyzer!
+
+---
+
+## License
+
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Developer Information
+
+**Developed by:** Umar Faizan  
+**GitHub:** [u-faizan](https://github.com/u-faizan)  
+**Email:** [mianumarzareen@gmail.com](mailto:mianumarzareen@gmail.com)
+
+---
+
+## Contact and Support
+
+- **Issues**: If you encounter bugs or have feature requests, please open an issue on [GitHub](https://github.com/u-faizan/nextgen-resume-analyzer/issues).
+- **Email**: For general inquiries or collaboration proposals, email at [mianumarzareen@gmail.com](mailto:mianumarzareen@gmail.com).
 
 ---
 
 ## Screenshots
 
-#### **User Mode - Resume Analysis**
-![Resume Analysis](https://via.placeholder.com/800x400?text=Resume+Analysis+Screen)
+Add screenshots or GIFs here to illustrate:
 
-#### **Admin Mode - User Data Dashboard**
-![Admin Dashboard](https://via.placeholder.com/800x400?text=Admin+Dashboard)
+1. **User Mode** – Resume Analysis, AI Summary, and Feedback  
+2. **Admin Mode** – User Data Dashboard, Resume Score Distribution, and Skills Overview
 
-## Conclusion
-The **NextGen Resume Analyzer** is an essential tool for anyone looking to enhance their resume, optimize for **ATS** compatibility, and receive personalized career suggestions. Whether you're a job seeker or a hiring manager, this tool helps streamline the resume evaluation process and boosts your chances of success in the job market. 🚀
+<details>
+<summary>Sample Screenshot</summary>
+<img src="https://via.placeholder.com/1200x600?text=NextGen+Resume+Analyzer+User+Mode" alt="Sample Screenshot">
+</details>
 
 ---
-### Keywords: Resume Analyzer, ATS Optimization, Resume Evaluation, AI Resume Analysis, Resume Tips, Job Matching, Resume Feedback, AI Career Recommendations, OpenAI, PDF Resume Analysis, Professional Development, Resume Skills, Resume Score, NextGen Resume Tool.
-```
 
+## Demo App
 
+<div align="center">
+  <a href="https://NextGen-Resume-Analyzer.streamlit.app/">
+    <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Streamlit App" />
+  </a>
+</div>
 
+---
 
-                          
+## GitHub Codespaces
+
+<div align="center">
+  <a href="https://NextGen-Resume-Analyzer/streamlit/app-starter-kit?quickstart=1">
+    <img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces" />
+  </a>
+</div>
+
+---
+
+## Conclusion
+
+The **NextGen Resume Analyzer** is an essential tool for anyone seeking to **optimize their resume** for **ATS compatibility**, improve overall presentation, and receive **personalized career recommendations**. Whether you’re a job seeker looking to stand out or a hiring manager streamlining candidate evaluations, NextGen Resume Analyzer helps you make data-driven decisions and boosts your chances of success in the job market. 
+
+**Try it out today and give your resume the edge it needs!**  
+
+_Keywords: Resume Analyzer, ATS Optimization, AI Resume Analysis, Resume Tips, Job Matching, Resume Feedback, AI Career Recommendations, PDF Resume Analysis, Professional Development, Resume Skills, Resume Score, NextGen Resume Tool._                    
 ## Demo App
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://NextGen-Resume-Analyzer.streamlit.app/)
@@ -153,16 +254,5 @@ The **NextGen Resume Analyzer** is an essential tool for anyone looking to enhan
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://NextGen-Resume-Analyzer/streamlit/app-starter-kit?quickstart=1)
 
-<div align="center">
-  <h2>Demo App</h2>
-  <a href="https://NextGen-Resume-Analyzer.streamlit.app/">
-    <img src="https://static.streamlit.io/badges/streamlit_badge_black_white.svg" alt="Streamlit App">
-  </a>
-
-  <h2>GitHub Codespaces</h2>
-  <a href="https://NextGen-Resume-Analyzer/streamlit/app-starter-kit?quickstart=1">
-    <img src="https://github.com/codespaces/badge.svg" alt="Open in GitHub Codespaces">
-  </a>
-</div>
 
                                        
