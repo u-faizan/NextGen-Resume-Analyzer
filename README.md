@@ -207,10 +207,9 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 ## Screenshots
 
-Add screenshots or GIFs here to illustrate:
-
-1. **User Mode** – Resume Analysis, AI Summary, and Feedback  
-2. **Admin Mode** – User Data Dashboard, Resume Score Distribution, and Skills Overview
+1. **User Mode** – Resume Analysis, AI Summary,Resume Score,Skills,Course Recommendations,Appreciation,Resume Writing Tips......Feedback
+   ![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/8e64217d9b6bb2058911a1265a633f315ed19adf/screenshots/user/1.png)
+3. **Admin Mode** – User Data Dashboard, Resume Score Distribution, and Skills Overview
 
 <details>
 <summary>Sample Screenshot</summary>
