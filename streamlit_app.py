@@ -531,7 +531,7 @@ if mode == "User":
             "Matching Job Roles": result.get("matching_job_roles", []),
             "ATS Keywords": result.get("ats_keywords", []),
             "Project Suggestions": result.get("project_suggestions", {}),
-            "Feedback": feedback
+            "Feedback": final_feedback
         }
         export_json = json.dumps(export_data, indent=4)
         st.download_button("Download Details as JSON", data=export_json, file_name="resume_analysis.json", mime="application/json")
