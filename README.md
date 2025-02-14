@@ -3,7 +3,7 @@
 
 # NextGen Resume Analyzer 📝 - AI-Powered Resume Evaluation Tool
 
-![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/670a59a2a5c6fc69b485822673637ccf42ddba58/screenshots/NextGen%20Resume%20Analyzer.png)
+![image alt](https://github.com/u-faizan/NextGen-Resume-Analyzer/blob/12b6df42d4b272888163efe83bcf99084195adb9/screenshots/NextGen%20Resume%20Analyzer.png)
 
 The **NextGen Resume Analyzer** is a cutting-edge, **AI-driven** web application designed to help job seekers and professionals optimize their resumes for better visibility and success in a competitive job market. Built using **Streamlit** and leveraging **OpenAI** technology, this tool evaluates resumes against **Applicant Tracking Systems (ATS)** standards and provides actionable insights to enhance structure, keyword optimization, and overall content quality.
 
