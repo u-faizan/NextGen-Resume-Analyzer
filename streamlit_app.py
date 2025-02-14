@@ -467,12 +467,7 @@ if mode == "User":
         with col_video2:
             st.video("https://youtu.be/aD7fP-2u3iY?si=KPnyC0D7HRStOWpB")
         
-        # --- Feedback Section (New) ---
-        st.markdown("""
-        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-            <h3 style="color:white; margin:0;">Feedback</h3>
-        </div>
-        """, unsafe_allow_html=True)
+
         # --- Automatically Save Analysis Record if Not Already Saved ---
         if "record_saved" not in st.session_state:
             cursor.execute('''
