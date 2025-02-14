@@ -473,15 +473,8 @@ if mode == "User":
             <h3 style="color:white; margin:0;">Feedback</h3>
         </div>
         """, unsafe_allow_html=True)
-        # --- Feedback & Save Analysis Section ---
-        st.markdown("""
-        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-            <h3 style="color:white; margin:0;">Feedback & Save Analysis</h3>
-        </div>
-        """, unsafe_allow_html=True)
-        feedback = st.text_area("Please provide your feedback (optional):", "")
-        
-        if st.button("Save Analysis"):
+        # --- Automatically Save Analysis Record if Not Already Saved ---
+        if "record_saved" not in st.session_state:
             cursor.execute('''
                 INSERT INTO user_data (name, email, resume_score, skills, recommended_skills, courses, feedback, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
@@ -493,10 +486,24 @@ if mode == "User":
                 ", ".join(result.get("skills", {}).get("recommended_skills", [])),
                 ", ".join([course.get("course_name", "Null") if isinstance(course, dict) else str(course)
                            for course in result.get("course_recommendations", [])]),
-                feedback  # This can be an empty string if no feedback is given.
+                ""  # Save feedback as empty if none provided
             ))
             conn.commit()
-            st.success("Analysis saved! Thank you.")
+            st.session_state.record_saved = True
+            st.session_state.record_id = cursor.lastrowid
+        
+        # --- Feedback Section ---
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Feedback</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        feedback = st.text_area("Please provide your feedback (optional):", "")
+        if st.button("Submit Feedback"):
+            cursor.execute("UPDATE user_data SET feedback=? WHERE id=?", (feedback, st.session_state.record_id))
+            conn.commit()
+            st.success("Feedback submitted! Thank you.")
+
 
         
         # --- Export Results Section (Single Instance) ---
