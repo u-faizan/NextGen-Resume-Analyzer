@@ -152,6 +152,8 @@ This project is licensed under the MIT License. See the LICENSE file for details
 Special thanks to the developers of Streamlit, PDFMiner, and other open-source libraries that made this project possible.
 Appreciation to the open-source community for continuous support and valuable resources.
 
+## Screenshots
+
 
 
                               
