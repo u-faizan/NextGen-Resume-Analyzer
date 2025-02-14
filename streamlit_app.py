@@ -483,36 +483,34 @@ if mode == "User":
             st.session_state.record_saved = True
             st.session_state.record_id = cursor.lastrowid
         
-            # --- Feedback Section ---
-            st.markdown("""
-            <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
-                <h3 style="color:white; margin:0;">Feedback</h3>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Initialize the feedback submission flag if not already set.
-            if "feedback_submitted" not in st.session_state:
-                st.session_state.feedback_submitted = False
-            
-            # Only allow feedback submission if not already submitted.
-            if not st.session_state.feedback_submitted:
-                feedback_input = st.text_area("Please provide your feedback (optional):", "")
-                if st.button("Submit Feedback"):
-                    cursor.execute("UPDATE user_data SET feedback=? WHERE id=?", (feedback_input, st.session_state.record_id))
-                    conn.commit()
-                    st.session_state.feedback_submitted = True
-                    st.session_state.final_feedback = feedback_input
-                    st.success("Feedback submitted! Thank you.")
-            else:
-                st.info("You have already submitted your feedback. Thank you!")
-            
-            # Ensure final_feedback is defined for use in the export section.
-            final_feedback = st.session_state.get("final_feedback", "")
-
-        # Ensure final_feedback is defined (defaults to an empty string)
+        # --- Feedback Section (Always Shown) ---
+        # Initialize the feedback submission flag if not already set.
+        if "feedback_submitted" not in st.session_state:
+            st.session_state.feedback_submitted = False
+        
+        st.markdown("""
+        <div style="background-color:#15967D; padding:10px; border-radius:5px; display:inline-block; margin-bottom:10px;">
+            <h3 style="color:white; margin:0;">Feedback</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        if not st.session_state.feedback_submitted:
+            feedback_input = st.text_area("Please provide your feedback (optional):", "")
+            if st.button("Submit Feedback"):
+                # Update the saved record with the new feedback.
+                cursor.execute("UPDATE user_data SET feedback=? WHERE id=?", (feedback_input, st.session_state.record_id))
+                conn.commit()
+                st.session_state.feedback_submitted = True
+                st.session_state.final_feedback = feedback_input
+                st.success("Feedback submitted! Thank you.")
+        else:
+            st.info("You have already submitted your feedback. Thank you!")
+        
+        # Ensure final_feedback exists for export (defaults to an empty string).
         if "final_feedback" not in st.session_state:
             st.session_state.final_feedback = ""
         final_feedback = st.session_state.final_feedback
+
 
         
         # --- Export Results Section (Single Instance) ---
